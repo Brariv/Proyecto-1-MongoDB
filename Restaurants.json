@@ -1,0 +1,20 @@
+{
+    _id: ObjectId(),
+    "state": "NY",
+    "city": "Anytown",
+    "location": {
+        "address1": "123 Main Street",
+        "address2": "Suite 100",
+        "postal_code": "12345",
+        "latitude": 40.7128,
+        "longitude": -74.0060
+    },
+    "hours": {
+        "Open": "10:00 AM",
+        "Close": "10:00 PM"
+    },
+    "type": "Pizza Hut Express",
+    "rating": 4.5,
+    "phone": "555-123-4567",
+    "not_available_products": [ObjectId(), ObjectId()]
+}

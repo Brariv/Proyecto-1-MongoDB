@@ -1,0 +1,8 @@
+{
+    _id: ObjectId(),
+    "Pizza": "Super Supreme Pizza (Pan Pizza)",
+    "Type": "Classic Recipe Pizzas",
+    "Size": "Large",
+    "Price": 12.99,
+    "available_until": ISODate("2024-12-31T23:59:59Z")
+}

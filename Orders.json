@@ -1,0 +1,15 @@
+{
+    _id: ObjectId(),
+    "User_id": ObjectId(),
+    "Restaurant_id": ObjectId(),
+    "Total": 25.99,
+    "Items": [
+        {
+            "Menu_id": ObjectId(),
+            "Quantity": 2,
+            "Price": 12.99
+        }
+    ],
+    "Order_date": ISODate("2024-06-01T18:30:00Z"),
+    "Payment_method": "Credit Card"
+}

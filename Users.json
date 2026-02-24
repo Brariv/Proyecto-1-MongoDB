@@ -1,0 +1,18 @@
+{
+  _id: ObjectId(),
+  "name": "Maria",
+  "email": "maria@email.com",
+  "password": "hashed_password",
+  "phone": "+555-987-6543",
+
+  "addresses": [
+    {
+      "alias": "Home",
+      "address": "456 Elm Street",
+      "city": "Anytown",
+      "latitude": 40.7128,
+      "longitude": -74.0060
+    }
+  ],
+  "reviews_id": [ObjectId(), ObjectId()] 
+}
