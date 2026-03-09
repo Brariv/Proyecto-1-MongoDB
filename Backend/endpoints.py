@@ -13,11 +13,11 @@ def login(email: str, password: str):
     
 @app.get("/address")
 def get_address(user_id: str):
-    # Aquí puedes agregar la lógica para obtener la dirección del usuario desde la base de datos utilizando el user_id.
-    # Por ejemplo, podrías buscar el usuario por su ID y luego devolver su dirección.
-    
-    # return 200 OK con la dirección del usuario
-    return {"address": "123 Main St, Anytown, USA"}
+    return get_address(user_id)
+
+@app.get("/restaurants/ordered")
+def get_restaurants_ordered(user_id: str):
+    return get_restaurants_ordered(user_id)
 
 @app.post("/address")
 def update_address(user_id: str, alias: str, address: str, city: str, state: str, postal_code: str):
@@ -29,27 +29,15 @@ def update_address(user_id: str, alias: str, address: str, city: str, state: str
 
 @app.get("/reviews")
 def get_review(user_id: str, restaurant_id: str):
-    # Aquí puedes agregar la lógica para obtener la reseña del usuario desde la base de datos utilizando el user_id y restaurant_id.
-    # Por ejemplo, podrías buscar la reseña por su ID y luego devolver sus detalles.
-
-    # return 200 OK con la reseña del usuario
-    return {"comment": "Great pizza!", "stars": 5, "date": "2023-10-10T10:00:00Z"}
+    return get_review(user_id, restaurant_id)
 
 @app.patch("/reviews/{review_id}")
 def update_review(review_id: int, comment: str, stars: int, user_id: str, restaurant_id: str):
-    # Aquí puedes agregar la lógica para actualizar la reseña en la base de datos.
-    # Por ejemplo, podrías buscar la reseña por su ID y luego actualizar los campos correspondientes.
-    
-    # return 200 OK con un mensaje de éxito
-    return {"message": f"Review {review_id} updated successfully"}
+    return patch_review(review_id, comment, stars, user_id, restaurant_id)
 
 @app.post("/reviews")
 def create_review(comment: str, stars: int, user_id: str, restaurant_id: str):
-    # Aquí puedes agregar la lógica para crear una nueva reseña en la base de datos.
-    # Por ejemplo, podrías insertar un nuevo documento con los campos proporcionados.
-    
-    # return 201 Created con un mensaje de éxito
-    return {"message": "Review created successfully"}, 201
+    return post_review(comment, stars, user_id, restaurant_id)
 
 
 
