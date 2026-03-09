@@ -4,7 +4,7 @@
 Enpoint is defined by a function that looks like this:
 ```
 @app.get("/login")
-def login(username: str, password: str):
+def login(email: str, password: str):
 ```
 
 So we need to make functions that look like this:

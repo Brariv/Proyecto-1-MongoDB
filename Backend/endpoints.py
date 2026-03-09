@@ -7,9 +7,9 @@ def read_root():
     return {"Hello": "World"}
 
 @app.get("/login")
-def login(username: str, password: str):
+def login(email: str, password: str):
     # Aquí puedes agregar la lógica de autenticación, por ejemplo, verificar el nombre de usuario y la contraseña en una base de datos.
-    if username == "admin" and password == "password":
+    if email == "admin@example.com" and password == "password":
         # return 200 OK con un mensaje de éxito
         return {"message": "Login successful", "user_id": "12345", "user_type": "admin"}
         
