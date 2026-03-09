@@ -14,5 +14,6 @@
       "longitude": -74.0060
     }
   ],
-  "reviews_id": [ObjectId(), ObjectId()] 
+  "reviews_id": [ObjectId(), ObjectId()] ,
+  "type": "Consumer"
 }
