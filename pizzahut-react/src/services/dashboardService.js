@@ -11,6 +11,13 @@ const API_BASE_URL = 'http://localhost:3000/api';
 // GET    `${API_BASE_URL}/users/:userId/reviewable-restaurants`
 // GET    `${API_BASE_URL}/orders?user_id=:userId`
 // GET    `${API_BASE_URL}/menu?restaurant_id=:restaurantId`
+// GET    `${API_BASE_URL}/admin/menu`
+// PATCH  `${API_BASE_URL}/admin/menu/stock`
+// PATCH  `${API_BASE_URL}/admin/restaurants/products/availability`
+// GET    `${API_BASE_URL}/admin/analytics/best-restaurants`
+// GET    `${API_BASE_URL}/admin/analytics/sales-by-state`
+// GET    `${API_BASE_URL}/admin/analytics/best-products`
+// GET    `${API_BASE_URL}/admin/analytics/monthly-sales-trend`
 // POST   `${API_BASE_URL}/orders`
 
 let MOCK_USERS = [
@@ -42,7 +49,7 @@ let MOCK_USERS = [
   },
 ];
 
-const MOCK_RESTAURANTS = [
+let MOCK_RESTAURANTS = [
   {
     _id: 'rest-001',
     state: 'NY',
@@ -60,6 +67,7 @@ const MOCK_RESTAURANTS = [
     },
     type: 'Pizza Hut Express',
     phone: '555-123-4567',
+    not_available_products: [],
   },
   {
     _id: 'rest-002',
@@ -78,6 +86,7 @@ const MOCK_RESTAURANTS = [
     },
     type: 'Pizza Hut',
     phone: '555-987-1212',
+    not_available_products: [],
   },
   {
     _id: 'rest-003',
@@ -96,6 +105,7 @@ const MOCK_RESTAURANTS = [
     },
     type: 'Pizza Hut Delivery',
     phone: '555-110-8899',
+    not_available_products: [],
   },
 ];
 
@@ -151,13 +161,14 @@ const MOCK_ORDERS = [
   },
 ];
 
-const MOCK_MENU_ITEMS = [
+let MOCK_MENU_ITEMS = [
   {
     _id: 'menu-001',
     Pizza: 'Super Supreme Pizza (Pan Pizza)',
     Type: 'Classic Recipe Pizzas',
     Size: 'Large',
     Price: 12.99,
+    Stock: 40,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-001',
   },
@@ -167,6 +178,7 @@ const MOCK_MENU_ITEMS = [
     Type: 'Classic Recipe Pizzas',
     Size: 'Medium',
     Price: 10.99,
+    Stock: 35,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-001',
   },
@@ -176,6 +188,7 @@ const MOCK_MENU_ITEMS = [
     Type: 'Vegetarian Pizzas',
     Size: 'Large',
     Price: 11.49,
+    Stock: 22,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-002',
   },
@@ -185,6 +198,7 @@ const MOCK_MENU_ITEMS = [
     Type: 'Classic Recipe Pizzas',
     Size: 'Large',
     Price: 13.49,
+    Stock: 18,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-002',
   },
@@ -194,6 +208,7 @@ const MOCK_MENU_ITEMS = [
     Type: 'Specialty Pizzas',
     Size: 'Personal',
     Price: 8.99,
+    Stock: 26,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-003',
   },
@@ -203,6 +218,7 @@ const MOCK_MENU_ITEMS = [
     Type: 'Classic Recipe Pizzas',
     Size: 'Large',
     Price: 9.99,
+    Stock: 31,
     available_until: '2026-12-31T23:59:59Z',
     restaurant_id: 'rest-003',
   },
@@ -268,7 +284,7 @@ export const updateUserProfile = async (userId, updatePayload) => {
 
 export const getAllLocations = async () => {
   if (USE_MOCK_DATA) {
-    return MOCK_RESTAURANTS;
+    return JSON.parse(JSON.stringify(MOCK_RESTAURANTS));
   }
 
   const response = await fetch(`${API_BASE_URL}/restaurants`);
@@ -400,13 +416,97 @@ export const createReview = async (reviewPayload) => {
 
 export const getMenuByRestaurant = async (restaurantId) => {
   if (USE_MOCK_DATA) {
-    return MOCK_MENU_ITEMS.filter((item) => item.restaurant_id === restaurantId);
+    return MOCK_MENU_ITEMS.filter((item) => item.restaurant_id === restaurantId).map((item) => ({ ...item }));
   }
 
   const response = await fetch(`${API_BASE_URL}/menu?restaurant_id=${restaurantId}`);
   if (!response.ok) {
     throw new Error('No se pudo cargar el menú del restaurante');
   }
+  return response.json();
+};
+
+export const getAdminMenuItems = async () => {
+  if (USE_MOCK_DATA) {
+    return JSON.parse(JSON.stringify(MOCK_MENU_ITEMS));
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin/menu`);
+  if (!response.ok) {
+    throw new Error('No se pudieron cargar los ítems del menú para admin');
+  }
+  return response.json();
+};
+
+export const updateAdminMenuStock = async (stockUpdates) => {
+  if (USE_MOCK_DATA) {
+    MOCK_MENU_ITEMS = MOCK_MENU_ITEMS.map((item) => {
+      const foundUpdate = stockUpdates.find((updateItem) => updateItem.Menu_id === item._id);
+      if (!foundUpdate) {
+        return item;
+      }
+      return {
+        ...item,
+        Stock: Math.max(0, Number(foundUpdate.Stock) || 0),
+      };
+    });
+
+    return {
+      ok: true,
+      updated: stockUpdates.length,
+    };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin/menu/stock`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ items: stockUpdates }),
+  });
+
+  if (!response.ok) {
+    throw new Error('No se pudo actualizar el stock del menú');
+  }
+
+  return response.json();
+};
+
+export const disableProductsForRestaurants = async ({ restaurantIds, menuIds }) => {
+  if (USE_MOCK_DATA) {
+    MOCK_RESTAURANTS = MOCK_RESTAURANTS.map((restaurant) => {
+      if (!restaurantIds.includes(restaurant._id)) {
+        return restaurant;
+      }
+
+      const currentSet = new Set(restaurant.not_available_products ?? []);
+      menuIds.forEach((menuId) => currentSet.add(menuId));
+
+      return {
+        ...restaurant,
+        not_available_products: Array.from(currentSet),
+      };
+    });
+
+    return {
+      ok: true,
+      updated_restaurants: restaurantIds.length,
+      affected_products: menuIds.length,
+    };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin/restaurants/products/availability`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ restaurant_ids: restaurantIds, menu_ids: menuIds, enabled: false }),
+  });
+
+  if (!response.ok) {
+    throw new Error('No se pudo actualizar la disponibilidad de productos');
+  }
+
   return response.json();
 };
 

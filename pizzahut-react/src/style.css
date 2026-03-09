@@ -656,6 +656,87 @@ body {
   margin-top: 1rem;
 }
 
+.availability-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.availability-card {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.availability-card h3,
+.availability-results h3 {
+  margin: 0 0 0.55rem;
+  color: #8f1616;
+  font-size: 1rem;
+}
+
+.availability-list {
+  max-height: 320px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.availability-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #3f3f3f;
+}
+
+.availability-actions {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.availability-results {
+  margin-top: 0.85rem;
+  border: 1px solid #ffd8d3;
+  background: #fff5f4;
+  border-radius: 10px;
+  padding: 0.7rem;
+}
+
+.availability-results p {
+  margin: 0.28rem 0;
+  font-size: 0.87rem;
+  color: #4a4a4a;
+}
+
+.admin-message {
+  margin-bottom: 0.8rem;
+  border: 1px solid #ffd2cc;
+  background: #fff4f3;
+  color: #8f1616;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+}
+
+.admin-user-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5a1d1d;
+  font-weight: 600;
+}
+
+.admin-table-title {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+  color: #b32a1f;
+  font-weight: 700;
+}
+
 .profile-screen-header {
   display: flex;
   justify-content: space-between;
@@ -757,6 +838,10 @@ body {
   }
 
   .review-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .availability-grid {
     grid-template-columns: 1fr;
   }
 
