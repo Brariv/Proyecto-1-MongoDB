@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from Backend.querys import *
 
 app = FastAPI()
 
@@ -8,14 +9,7 @@ def read_root():
 
 @app.get("/login")
 def login(email: str, password: str):
-    # Aquí puedes agregar la lógica de autenticación, por ejemplo, verificar el nombre de usuario y la contraseña en una base de datos.
-    if email == "admin@example.com" and password == "password":
-        # return 200 OK con un mensaje de éxito
-        return {"message": "Login successful", "user_id": "12345", "user_type": "admin"}
-        
-    else:
-        # return 401 Unauthorized con un mensaje de error
-        return {"message": "Invalid username or password"}, 401
+    return get_login(email, password)
     
 @app.get("/address")
 def get_address(user_id: str):
