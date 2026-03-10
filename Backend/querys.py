@@ -136,7 +136,7 @@ def get_restaurants():
     
     restaurants = restaurants_collection.find()
     
-    return [{"restaurant_id": str(restaurant["_id"]), "type": restaurant["type"], "address": restaurant["location"], "phone": restaurant["phone"], "state": restaurant["state"], "city": restaurant["city"]} for restaurant in restaurants]
+    return [{"restaurant_id": str(restaurant["_id"]), "type": restaurant["type"], "address": restaurant["location"], "phone": restaurant["phone"], "state": restaurant["state"], "city": restaurant["city"], "hours": restaurant["hours"]} for restaurant in restaurants]
 
 def get_restaurant_names():
     client = MongoClient(mongo_uri)
@@ -201,7 +201,7 @@ def get_near_restaurants(latitude: float, longitude: float):
     restaurants_collection = db["restaurantes"]
 
     restaurants = restaurants_collection.find({
-        "location": {
+        "location.geo": {
             "$near": {
                 "$geometry": {
                     "type": "Point",
