@@ -318,6 +318,88 @@
               "body": "[\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a69db\",\n        \"name\": \"Pizza Hut Express\",\n        \"address\": \"1654 Gadsden Highway\"\n    },\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a69f0\",\n        \"name\": \"Pizza Hut\",\n        \"address\": \"1010 Ft Rucker\"\n    },\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6a10\",\n        \"name\": \"Pizza Hut\",\n        \"address\": \"424 S. Forest Ave.\"\n    },\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6a25\",\n        \"name\": \"Pizza Hut\",\n        \"address\": \"720 2nd Ave E\"\n    },\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6a5b\",\n        \"name\": \"Pizza Hut\",\n        \"address\": \"1151 S Rogers St\"\n    },\n    {\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6b3f\",\n        \"name\": \"Pizza Hut\",\n        \"address\": \"1843 S 4th Ave\"\n    }\n]"
             }
           ]
+        },
+        {
+          "name": "Delete Address for User",
+          "id": "d062d006-42a4-4d68-83ac-09e3f1551105",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"address\": \"5270 W. Baseline Rd.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "addresses"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "ed96f63c-e00a-4336-96e9-6935e2ba39e0",
+              "name": "New Request",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"address\": \"5270 W. Baseline Rd.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{userId}}",
+                    "addresses"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 01:34:50 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "42"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T01:34:56.914Z",
+              "body": "{\n    \"message\": \"Address deleted successfully\"\n}"
+            }
+          ]
         }
       ],
       "id": "8cffc1ee-7157-4fdd-83e6-9ff7ecc01b5d"

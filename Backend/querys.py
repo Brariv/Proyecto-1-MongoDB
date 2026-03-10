@@ -39,6 +39,22 @@ def get_address(User_id: str):
     else:
         return {"message": "User not found or address not available"}, 404
     
+
+def delete_address(User_id: str, address: str):
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    users_collection = db["usuarios"]
+    
+    update_result = users_collection.update_one(
+        {"_id": ObjectId(User_id)},
+        {"$pull": {"addresses": {"address": address}}}
+    )
+    
+    if update_result.modified_count > 0:
+        return {"message": "Address deleted successfully"}
+    else:
+        return {"message": "Failed to delete address"}, 500
+
 def get_restaurants_ordered(User_id: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]
@@ -196,7 +212,7 @@ def get_near_restaurants(latitude: float, longitude: float):
         }
     })
 
-    return [{"name": restaurant["type"], "hours": restaurant["hours"], "phone": restaurant["phone"], "address": restaurant["location"]["address1"]} for restaurant in restaurants]
+    return [{"restaurant_id": str(restaurant["_id"]), "type": restaurant["type"], "address": restaurant["location"], "phone": restaurant["phone"], "state": restaurant["state"], "city": restaurant["city"]} for restaurant in restaurants]
 
 def post_menu(pizza: str, type: str, size: str, price: float, available_until: str):
     client = MongoClient(mongo_uri)
@@ -412,3 +428,4 @@ def get_monthly_sales_trend():
     ]
 
     return list(orders_collection.aggregate(pipeline))
+

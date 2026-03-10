@@ -48,6 +48,8 @@ class bulk_edit(BaseModel):
     items_ids: list
     restaurants_ids: list
 
+class address_del(BaseModel):
+    address: str
 
 @app.get("/")
 def read_root():
@@ -60,6 +62,10 @@ def login(user: User):
 @app.get("/users/{user_id}/addresses")
 def address(user_id: str):
     return get_address(user_id)
+
+@app.delete("/users/{user_id}/addresses")
+def del_address(user_id: str, address: address_del):
+    return delete_address(user_id, address.address)
 
 @app.get("/restaurants/ordered/{user_id}")
 def restaurants_ordered(user_id: str):
