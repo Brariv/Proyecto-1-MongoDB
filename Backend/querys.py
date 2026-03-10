@@ -210,7 +210,7 @@ def get_near_restaurants(latitude: float, longitude: float):
                 "$maxDistance": 20000
             }
         }
-    })
+    }).limit(3)
 
     return [{"restaurant_id": str(restaurant["_id"]), "type": restaurant["type"], "address": restaurant["location"], "phone": restaurant["phone"], "state": restaurant["state"], "city": restaurant["city"]} for restaurant in restaurants]
 
