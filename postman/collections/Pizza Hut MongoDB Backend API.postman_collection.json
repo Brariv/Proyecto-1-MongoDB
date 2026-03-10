@@ -982,6 +982,79 @@
               "body": "{\n    \"message\": \"Menu updated successfully\"\n}"
             }
           ]
+        },
+        {
+          "name": "Delete Menu Item",
+          "id": "0fb1b4ff-2115-473f-9769-314dca366d4c",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/menu/69aefe6688aadb40978dcaec",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "69aefe6688aadb40978dcaec"
+              ]
+            },
+            "description": "Crea un item en la colección `menu`."
+          },
+          "response": [
+            {
+              "id": "0168c3ab-862d-457f-a28e-d0ebe3af55d0",
+              "name": "Delete Menu Item",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/menu/69aefe6688aadb40978dcaec",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "menu",
+                    "69aefe6688aadb40978dcaec"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 16:40:12 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "44"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T16:40:20.488Z",
+              "body": "{\n    \"message\": \"Menu item deleted successfully\"\n}"
+            }
+          ]
         }
       ],
       "id": "ca06b06b-71e2-4f4f-9c6e-a893228e8615"

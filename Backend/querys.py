@@ -284,6 +284,17 @@ def bulk_update_menu(restaurants_ids: list, not_available_items: list):
         return {"message": "Failed to update menu"}, 500
     
 
+def delete_menu_item(item_id: str):
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    menu_collection = db["menu"]
+
+    delete_result = menu_collection.delete_one({"_id": ObjectId(item_id)})
+
+    if delete_result.deleted_count > 0:
+        return {"message": "Menu item deleted successfully"}
+    else:
+        return {"message": "Failed to delete menu item"}, 500
 
 def get_top_rated_restaurants():
     client = MongoClient(mongo_uri)

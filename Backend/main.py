@@ -142,3 +142,7 @@ def sales_per_month():
 def mark_item_unavailable(bulk_edit: bulk_edit):
     return bulk_update_menu(bulk_edit.restaurants_ids, bulk_edit.items_ids)
 
+@app.delete("/menu/{item_id}")
+def delete_item(item_id: str):
+    return delete_menu_item(item_id)
+
