@@ -18,6 +18,7 @@ const ADMIN_SECTIONS = {
   sales: 'sales',
   bestProducts: 'best-products',
   salesTrend: 'sales-trend',
+  reports: 'reports',
 };
 
 export default function AdminDashboard({ user, onLogout }) {
@@ -376,6 +377,25 @@ export default function AdminDashboard({ user, onLogout }) {
     </section>
   );
 
+  const renderReportsSection = () => (
+    <section className="dashboard-panel">
+      <h2>Reportes</h2>
+      <iframe
+        style={{
+          background: '#F1F5F4',
+          border: 'none',
+          borderRadius: '2px',
+          boxShadow: '0 2px 10px 0 rgba(70, 76, 79, .2)',
+          width: '100%',
+          height: '100vh',
+          display: 'block',
+        }}
+        src="https://charts.mongodb.com/charts-project-0-hyxjueh/embed/dashboards?id=83a82352-a94c-4e52-ae0c-accb260864b4&theme=light&autoRefresh=true&maxDataAge=14400&showTitleAndDesc=false&scalingWidth=fixed&scalingHeight=fixed"
+        title="Reportes"
+      />
+    </section>
+  );
+
   return (
     <main className="dashboard-page">
       <aside className="dashboard-sidebar">
@@ -427,6 +447,13 @@ export default function AdminDashboard({ user, onLogout }) {
           >
             <ChartLine size={18} /> Tendencia de ventas
           </button>
+          <button
+            type="button"
+            className={activeSection === ADMIN_SECTIONS.reports ? 'active' : ''}
+            onClick={() => setActiveSection(ADMIN_SECTIONS.reports)}
+          >
+            <BarChart3 size={18} /> Reportes
+          </button>
         </nav>
       </aside>
 
@@ -450,6 +477,7 @@ export default function AdminDashboard({ user, onLogout }) {
         {activeSection === ADMIN_SECTIONS.sales && renderSalesSection()}
         {activeSection === ADMIN_SECTIONS.bestProducts && renderBestProductsSection()}
         {activeSection === ADMIN_SECTIONS.salesTrend && renderSalesTrendSection()}
+        {activeSection === ADMIN_SECTIONS.reports && renderReportsSection()}
       </section>
     </main>
   );
