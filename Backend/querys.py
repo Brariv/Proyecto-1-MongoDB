@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from datetime import datetime, timezone
 import os
+from coorgen import *
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ def get_login(email: str, password: str):
     user = users_collection.find_one({"email": email, "password": password})
     
     if user:
-        return {"message": "Login successful", "User_id": str(user["_id"]), "user_type": user["type"], "user_name": user["name"]}
+        return {"message": "Login successful", "User_id": str(user["_id"]), "user_type": user["type"], "user_name": user["name"], "phone": user["phone"]}
     else:
         return {"message": "Invalid email or password"}, 401
     
@@ -154,6 +155,8 @@ def create_address(user_id: str, alias: str, address: str, city: str, state: str
     client = MongoClient(mongo_uri)
     db = client[db_name]
     users_collection = db["usuarios"]
+
+    lat, lon = random_coordinate_in_state(state)
     
     new_address = {
         "alias": alias,
@@ -161,13 +164,13 @@ def create_address(user_id: str, alias: str, address: str, city: str, state: str
         "city": city,
         "state": state,
         "postal_code": postal_code,
-        "longitude": None,
-        "latitude": None
+        "longitude": lon,
+        "latitude": lat
     }
     
     update_result = users_collection.update_one(
         {"_id": ObjectId(user_id)},
-        {"$push": {"address": new_address}}
+        {"$push": {"addresses": new_address}}
     )
     
     if update_result.modified_count > 0:

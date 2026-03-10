@@ -1,6 +1,7 @@
 .postman
 postman/globals
 postman/environments
+.cache_geo
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

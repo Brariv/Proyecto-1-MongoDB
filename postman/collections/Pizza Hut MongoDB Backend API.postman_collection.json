@@ -88,6 +88,56 @@
               "cookie": [],
               "responseTime": "2026-03-09T17:04:49.077Z",
               "body": "{\n    \"message\": \"Login successful\",\n    \"User_id\": \"69ac7ea0d98fe243f22a6c35\",\n    \"user_type\": \"Consumer\",\n    \"user_name\": \"Hayden Miller\"\n}"
+            },
+            {
+              "id": "879c899f-79de-4d6c-a6be-b74854ac1041",
+              "name": "Login",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"hayden.miller8578@email.com\",\n  \"password\": \"hashed_password\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 05:02:40 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "144"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T05:02:44.032Z",
+              "body": "{\n    \"message\": \"Login successful\",\n    \"User_id\": \"69ac7ea0d98fe243f22a6c35\",\n    \"user_type\": \"Consumer\",\n    \"user_name\": \"Hayden Miller\",\n    \"phone\": \"+1-371-957-7685\"\n}"
             }
           ]
         }
@@ -250,6 +300,58 @@
               ],
               "cookie": [],
               "responseTime": "2026-03-09T17:06:26.940Z",
+              "body": "[\n    {\n        \"message\": \"Address created successfully\"\n    },\n    201\n]"
+            },
+            {
+              "id": "12f934a4-2ac9-4795-b129-1e1bbd6ae57a",
+              "name": "Create Address for User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alias\": \"Home\",\n  \"address\": \"123 Main St\",\n  \"city\": \"Houston\",\n  \"state\": \"TX\",\n  \"postal_code\": \"77002\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{userId}}",
+                    "addresses"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 04:59:57 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "48"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T05:01:46.558Z",
               "body": "[\n    {\n        \"message\": \"Address created successfully\"\n    },\n    201\n]"
             }
           ]
