@@ -221,7 +221,7 @@ def get_near_restaurants(latitude: float, longitude: float):
                     "type": "Point",
                     "coordinates": [longitude, latitude]
                 },
-                "$maxDistance": 20000
+                "$maxDistance": 50000
             }
         }
     }).limit(3)
