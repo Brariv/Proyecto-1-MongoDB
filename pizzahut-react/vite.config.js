@@ -66,6 +66,19 @@ export default defineConfig({
               return;
             }
 
+            if (req.method === 'POST' && req.url === '/api/restaurants/near') {
+              const chunks = [];
+              req.on('data', (chunk) => chunks.push(chunk));
+              await new Promise((resolve) => req.on('end', resolve));
+
+              const rawBody = Buffer.concat(chunks).toString('utf-8') || '{}';
+              const backendResponse = await forwardGetWithBody('/restaurants/near', rawBody);
+              res.statusCode = backendResponse.statusCode;
+              res.setHeader('Content-Type', backendResponse.contentType);
+              res.end(backendResponse.body);
+              return;
+            }
+
             const reviewMatch =
               req.method === 'GET' && req.url ? req.url.match(/^\/api\/reviews\/([^?]+)(\?.*)?$/) : null;
 

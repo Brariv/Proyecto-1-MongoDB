@@ -55,6 +55,7 @@ const normalizeAddress = (address, index = 0) => ({
 
 const normalizeRestaurant = (restaurant) => {
   const location = restaurant.address || restaurant.location || {};
+  const rawAddress = typeof restaurant.address === 'string' ? restaurant.address : '';
 
   return {
     _id: restaurant.restaurant_id || restaurant._id || restaurant.id,
@@ -63,7 +64,7 @@ const normalizeRestaurant = (restaurant) => {
     city: restaurant.city || '',
     phone: restaurant.phone || '',
     location: {
-      address1: location.address1 || restaurant.address || '',
+      address1: location.address1 || rawAddress || '',
       address2: location.address2 || '',
       postal_code: location.postal_code || '',
       latitude: Number(location.latitude) || Number(location.geo?.coordinates?.[1]) || 0,
@@ -75,6 +76,29 @@ const normalizeRestaurant = (restaurant) => {
     },
     not_available_products: restaurant.not_available_products || [],
   };
+};
+
+const getNearRestaurants = async (latitude, longitude) => {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return [];
+  }
+
+  const response = await requestJson('/restaurants/near', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+    body: JSON.stringify({
+      latitude: lat,
+      longitude: lon,
+    }),
+  });
+
+  const items = Array.isArray(response) ? response : Array.isArray(response?.restaurants) ? response.restaurants : [];
+  return items.map(normalizeRestaurant);
 };
 
 const normalizeReview = (review, fallbackUserId, fallbackRestaurantId) => ({
@@ -220,21 +244,10 @@ export const getAllLocations = async () => {
 };
 
 export const getNearbyLocationsByAddress = async (address) => {
-  const locations = await getAllLocations();
-  return locations
-    .map((restaurant) => ({
-      ...restaurant,
-      distanceKm: Number(
-        getDistanceKm(
-          Number(address?.latitude) || 0,
-          Number(address?.longitude) || 0,
-          restaurant.location.latitude,
-          restaurant.location.longitude,
-        ).toFixed(2),
-      ),
-    }))
-    .sort((first, second) => first.distanceKm - second.distanceKm)
-    .slice(0, 3);
+  const latitude = Number(address?.latitude) || Number(address?.geo?.coordinates?.[1]) || 0;
+  const longitude = Number(address?.longitude) || Number(address?.geo?.coordinates?.[0]) || 0;
+
+  return getNearRestaurants(latitude, longitude);
 };
 
 export const getUserReviews = async (userId) => {
@@ -453,49 +466,18 @@ const normalizeOrderPayload = (orderPayload) => {
 export const submitOrder = async (orderPayload) => {
   const normalizedOrderPayload = normalizeOrderPayload(orderPayload);
 
-  try {
-    const response = await requestJson('/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(normalizedOrderPayload),
-    });
+  const response = await requestJson('/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(normalizedOrderPayload),
+  });
 
-    return {
-      ...(typeof response === 'object' && response !== null ? response : {}),
-      persisted_payload: normalizedOrderPayload,
-      requested_payload: normalizedOrderPayload,
-      used_fallback: false,
-    };
-  } catch (error) {
-    const hasItems = Array.isArray(normalizedOrderPayload?.items) && normalizedOrderPayload.items.length > 0;
-    const isServerError = String(error?.message || '').includes('500');
-
-    if (!hasItems || !isServerError) {
-      throw error;
-    }
-
-    const fallbackPayload = {
-      ...normalizedOrderPayload,
-      items: [],
-    };
-
-    const fallbackResponse = await requestJson('/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(fallbackPayload),
-    });
-
-    return {
-      ...(typeof fallbackResponse === 'object' && fallbackResponse !== null ? fallbackResponse : {}),
-      persisted_payload: fallbackPayload,
-      requested_payload: orderPayload,
-      used_fallback: true,
-      warning:
-        'La orden fue registrada, pero el backend rechazó los items y se guardó con items vacíos.',
-    };
-  }
+  return {
+    ...(typeof response === 'object' && response !== null ? response : {}),
+    persisted_payload: normalizedOrderPayload,
+    requested_payload: normalizedOrderPayload,
+    used_fallback: false,
+  };
 };

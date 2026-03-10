@@ -444,8 +444,6 @@ export default function UserDashboard({ user, onLogout }) {
               {location.location.address1}, {location.location.address2}
             </p>
             <p>{location.city}, {location.state}</p>
-            <p>Horario: {location.hours.Open} - {location.hours.Close}</p>
-            <p>Distancia aprox: {location.distanceKm} km</p>
             <button
               type="button"
               className="select-restaurant-button"
