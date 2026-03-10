@@ -254,10 +254,12 @@ def create_order(user_id: str, restaurant_id: str, items: list, payment_method: 
     orders_collection = db["ordenes"]
     menu_collection = db["menu"]
 
+    menu = menu_collection.find({"_id": {"$in": [ObjectId(item["menu_id"]) for item in items]}})
+
     menu_items = [{
         "Menu_id": item["menu_id"],
         "Quantity": item["quantity"],
-        "Price": menu_collection.find_one({"_id": ObjectId(item["menu_id"])})["Price"]
+        "Price": next((m["Price"] for m in menu if str(m["_id"]) == item["menu_id"]), 0.0)
     } for item in items]
 
 
