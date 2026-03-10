@@ -75,17 +75,19 @@ def get_restaurants_ordered(User_id: str):
 
 
 
-def get_review(User_id: str, restaurant_id: str):
+def get_review(User_id: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     reviews_collection = db["resenas"]
     
-    review = reviews_collection.find_one({"user_id": ObjectId(User_id), "restaurant_id": ObjectId(restaurant_id)})
+    reviews = reviews_collection.find({"user_id": ObjectId(User_id)})
     
-    if review:
-        return {"review_id": str(review["_id"]), "comment": review["comment"], "stars": review["stars"], "date": review["date"].isoformat()}
+    reviews_list = [{"review_id": str(review["_id"]), "comment": review["comment"], "stars": review["stars"], "date": review["date"].isoformat()} for review in reviews]
+    
+    if reviews_list:
+        return {"reviews": reviews_list}
     else:
-        return {"message": "Review not created yet"}, 204
+        return {"message": "No reviews found"}, 204
 
 def post_review(comment: str, stars: int, User_id: str, restaurant_id: str):
     client = MongoClient(mongo_uri)
@@ -185,11 +187,11 @@ def get_menu_restaurant(restaurant_id: str):
     restaurant_collection = db["restaurantes"]
     
     menu = menu_collection.find()
-    not_available_items = restaurant_collection.find_one({"_id": ObjectId(restaurant_id)})
+    not_available_products = restaurant_collection.find_one({"_id": ObjectId(restaurant_id)})
 
     menu_items = []
     for item in menu:
-        if item["_id"] not in not_available_items.get("not_available_items", []):
+        if item["_id"] not in not_available_products.get("not_available_products", []):
             menu_items.append({"id": str(item["_id"]), "pizza": item["Pizza"], "type": item["Type"], "size": item["Size"], "price": item["Price"]})
 
     
@@ -279,14 +281,14 @@ def create_order(user_id: str, restaurant_id: str, items: list, payment_method: 
     else:
         return {"message": "Failed to create order"}, 500
     
-def bulk_update_menu(restaurants_ids: list, not_available_items: list):
+def bulk_update_menu(restaurants_ids: list, not_available_products: list):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     restaurant_collection = db["restaurantes"]
 
     update_result = restaurant_collection.update_many(
         {"_id": {"$in": [ObjectId(restaurant_id) for restaurant_id in restaurants_ids]}},
-        {"$set": {"not_available_items": not_available_items}}
+        {"$set": {"not_available_products": not_available_products}}
     )
 
     if update_result.modified_count > 0:

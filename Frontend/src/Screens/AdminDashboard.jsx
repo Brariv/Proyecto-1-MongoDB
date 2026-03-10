@@ -306,17 +306,6 @@ export default function AdminDashboard({ user, onLogout }) {
                   }
                 />
               </label>
-
-              <label className="full-width">
-                Disponible hasta (opcional)
-                <input
-                  value={newMenuItemForm.available_until}
-                  onChange={(event) =>
-                    setNewMenuItemForm((prev) => ({ ...prev, available_until: event.target.value }))
-                  }
-                  placeholder="forever"
-                />
-              </label>
             </div>
 
             <div className="review-modal-actions">

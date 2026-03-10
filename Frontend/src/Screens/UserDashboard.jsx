@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MapPin, Pizza, Star, UserCircle2, LogOut, Store, Minus, Plus, Send, Search, Pencil, X, Trash2 } from 'lucide-react';
 import {
   createReview,
@@ -62,6 +62,10 @@ export default function UserDashboard({ user, onLogout }) {
     restaurant_id: '',
   });
 
+  // Guards to prevent request storms (dev strict mode / remounts / prop churn)
+  const lastLoadedUserIdRef = useRef(null);
+  const inFlightLoadRef = useRef(false);
+
   useEffect(() => {
     if (!toast?.id) {
       return undefined;
@@ -75,45 +79,62 @@ export default function UserDashboard({ user, onLogout }) {
   }, [toast?.id]);
 
   useEffect(() => {
+    if (!user?.id) {
+      return undefined;
+    }
+
+    // Avoid repeated loads for the same user.
+    if (lastLoadedUserIdRef.current === user.id || inFlightLoadRef.current) {
+      return undefined;
+    }
+
+    lastLoadedUserIdRef.current = user.id;
+    inFlightLoadRef.current = true;
+
+    let cancelled = false;
+
     const loadData = async () => {
-      try {
-        const userProfile = await getUserProfile(user.id, {
-          noCache: true,
-          cacheBust: true,
-          profileFallback: {
-            name: user?.name || '',
-            email: user?.email || '',
-            phone: user?.phone || '',
-          },
-        });
-        const allLocations = await getAllLocations();
-        const userReviews = await getUserReviews(user.id);
-        const allowedRestaurants = await getReviewableRestaurants(user.id);
+      const [userProfile, allLocations] = await Promise.all([
+      getUserProfile(user.id, { noCache: true, cacheBust: true, profileFallback: { name: user?.name || '', email: user?.email || '', phone: user?.phone || '' } }),
+      getAllLocations(),
+    ]);
 
-        setProfile(userProfile);
-        setProfileForm({
-          name: userProfile?.name || user?.name || '',
-          email: userProfile?.email || user?.email || '',
-          phone: userProfile?.phone || user?.phone || '',
-          addresses: userProfile?.addresses ?? [],
-        });
-        setLocations(allLocations);
-        setReviews(userReviews);
-        setReviewableRestaurants(allowedRestaurants);
+    setProfile(userProfile);
+    setProfileForm({
+      name: userProfile?.name || user?.name || '',
+      email: userProfile?.email || user?.email || '',
+      phone: userProfile?.phone || user?.phone || '',
+      addresses: userProfile?.addresses ?? [],
+    });
+    setLocations(allLocations);
 
-        if (userProfile?.addresses?.length) {
-          const firstAddress = userProfile.addresses[0];
-          setSelectedAddressId(firstAddress.id);
-          const nearest = await getNearbyLocationsByAddress(firstAddress);
-          setRecommendedLocations(nearest);
-        }
-      } catch (loadError) {
-        console.error(loadError);
+    // cargar reviews sin bloquear
+    (async () => {
+      const userReviews = await getUserReviews(user.id);
+      console.log('User reviews:', userReviews);
+      const allowedRestaurants = await getReviewableRestaurants(user.id);
+      setReviews(userReviews);
+      setReviewableRestaurants(allowedRestaurants);
+    })();
+
+    // cargar near sin bloquear
+    (async () => {
+      if (userProfile?.addresses?.length) {
+        const firstAddress = userProfile.addresses[0];
+        setSelectedAddressId(firstAddress.id);
+        const nearest = await getNearbyLocationsByAddress(firstAddress);
+        setRecommendedLocations(nearest);
       }
+    })();
     };
 
     loadData();
-  }, [user.id, user?.name, user?.email, user?.phone]);
+
+    return () => {
+      cancelled = true;
+      inFlightLoadRef.current = false;
+    };
+  }, [user?.id]);
 
   const refreshReviewsData = async () => {
     try {

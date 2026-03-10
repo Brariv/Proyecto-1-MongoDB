@@ -283,9 +283,7 @@ export const getNearbyLocationsByAddress = async (address) => {
 };
 
 export const getUserReviews = async (userId) => {
-  if (!userId) {
-    return [];
-  }
+  if (!userId) return [];
 
   if (USER_REVIEWS_CACHE.has(userId)) {
     return USER_REVIEWS_CACHE.get(userId);
@@ -296,22 +294,24 @@ export const getUserReviews = async (userId) => {
   }
 
   const pendingRequest = (async () => {
-    const orderedRestaurants = await getRestaurantsOrderedByUser(userId);
-    const restaurants = Array.isArray(orderedRestaurants) ? orderedRestaurants : [];
+    // ✅ una sola request para todas las reseñas del usuario
+    const response = await requestJson(`/reviews/${userId}`);
 
-    const reviewRequests = restaurants
-      .map((restaurant) => restaurant.restaurant_id)
-      .filter(Boolean)
-      .map((restaurantId) =>
-        requestJson(`/reviews/${userId}?restaurant_id=${encodeURIComponent(restaurantId)}`)
-          .then((review) => normalizeReview(review, userId, restaurantId))
-          .catch(() => null),
-      );
+    // soporta: array directo, {reviews:[...]}, o un solo objeto
+    const list = Array.isArray(response)
+      ? response
+      : response && Array.isArray(response.reviews)
+        ? response.reviews
+        : response && (response.review_id || response._id)
+          ? [response]
+          : [];
 
-    const reviews = await Promise.all(reviewRequests);
-    const normalizedReviews = reviews.filter((review) => review && review._id);
-    USER_REVIEWS_CACHE.set(userId, normalizedReviews);
-    return normalizedReviews;
+    const normalized = list
+      .map((review) => normalizeReview(review, userId, review?.restaurant_id))
+      .filter((review) => review && review._id);
+
+    USER_REVIEWS_CACHE.set(userId, normalized);
+    return normalized;
   })();
 
   USER_REVIEWS_IN_FLIGHT.set(userId, pendingRequest);

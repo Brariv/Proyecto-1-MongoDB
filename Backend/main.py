@@ -76,8 +76,8 @@ def createAddress(user_id: str, address: Address):
     return create_address(user_id, address.alias, address.address, address.city, address.state, address.postal_code)
 
 @app.get("/reviews/{user_id}")
-def review(user_id: str, restaurant_id: restaurant_id):
-    return get_review(user_id, restaurant_id.restaurant_id)
+def review(user_id: str):
+    return get_review(user_id)
 
 @app.patch("/reviews/{review_id}")
 def review(review_id: str, review: review_id):
@@ -85,6 +85,7 @@ def review(review_id: str, review: review_id):
 
 @app.post("/reviews")
 def review(review: review_id):
+    # comment: str, stars: int, User_id: str, restaurant_id: str
     return post_review(review.comment, review.stars, review.user_id, review.restaurant_id)
 
 
