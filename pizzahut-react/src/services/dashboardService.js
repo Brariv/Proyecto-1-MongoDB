@@ -462,6 +462,26 @@ export const getAdminMenuItems = async () => {
   return getMenuByRestaurant(firstRestaurantId);
 };
 
+export const getTopRatedRestaurants = async () => {
+  const response = await requestJson('/best-rated');
+  return Array.isArray(response) ? response : [];
+};
+
+export const getSalesByState = async () => {
+  const response = await requestJson('/sales-per-state');
+  return Array.isArray(response) ? response : [];
+};
+
+export const getBestSellingProducts = async () => {
+  const response = await requestJson('/best-sellers');
+  return Array.isArray(response) ? response : [];
+};
+
+export const getMonthlySalesTrend = async () => {
+  const response = await requestJson('/sales-per-month');
+  return Array.isArray(response) ? response : [];
+};
+
 export const updateAdminMenuStock = async () => {
   throw new Error('El backend actual no expone un endpoint para actualizar stock de menú.');
 };

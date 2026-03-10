@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ListChecks, ShieldAlert, Minus, Plus, Save, LogOut, BarChart3, TrendingUp, ShoppingBasket, ChartLine } from 'lucide-react';
 import {
+  getBestSellingProducts,
   disableProductsForRestaurants,
   getAdminMenuItems,
   getAllLocations,
+  getMonthlySalesTrend,
+  getSalesByState,
+  getTopRatedRestaurants,
   updateAdminMenuStock,
 } from '../services/dashboardService';
 
@@ -24,14 +28,36 @@ export default function AdminDashboard({ user, onLogout }) {
   const [selectedRestaurantIds, setSelectedRestaurantIds] = useState([]);
   const [selectedMenuIds, setSelectedMenuIds] = useState([]);
   const [adminMessage, setAdminMessage] = useState('');
+  const [bestRestaurants, setBestRestaurants] = useState([]);
+  const [salesByState, setSalesByState] = useState([]);
+  const [bestProducts, setBestProducts] = useState([]);
+  const [salesTrend, setSalesTrend] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [adminMenuItems, allLocations] = await Promise.all([getAdminMenuItems(), getAllLocations()]);
+        const [
+          adminMenuItems,
+          allLocations,
+          topRatedRestaurants,
+          salesByStateData,
+          bestSellers,
+          monthlyTrend,
+        ] = await Promise.all([
+          getAdminMenuItems(),
+          getAllLocations(),
+          getTopRatedRestaurants(),
+          getSalesByState(),
+          getBestSellingProducts(),
+          getMonthlySalesTrend(),
+        ]);
 
         setMenuItems(adminMenuItems);
         setLocations(allLocations);
+        setBestRestaurants(topRatedRestaurants);
+        setSalesByState(salesByStateData);
+        setBestProducts(bestSellers);
+        setSalesTrend(monthlyTrend);
         setStockByMenuId(
           adminMenuItems.reduce((acc, item) => {
             acc[item._id] = item.Stock ?? 0;
@@ -243,7 +269,17 @@ export default function AdminDashboard({ user, onLogout }) {
               <th>Total de Reseñas</th>
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            {bestRestaurants.map((restaurant) => (
+              <tr key={restaurant.restaurant_id}>
+                <td>{restaurant.restaurant_id}</td>
+                <td>{restaurant.name || '-'}</td>
+                <td>{restaurant.city || '-'}</td>
+                <td>{Number(restaurant.avgStars ?? 0).toFixed(2)}</td>
+                <td>{restaurant.totalReviews ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>
@@ -264,7 +300,15 @@ export default function AdminDashboard({ user, onLogout }) {
               <th>Órdenes Totales</th>
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            {salesByState.map((item) => (
+              <tr key={item.state}>
+                <td>{item.state || '-'}</td>
+                <td>${Number(item.total_sales ?? 0).toFixed(2)}</td>
+                <td>{item.total_orders ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>
@@ -286,7 +330,16 @@ export default function AdminDashboard({ user, onLogout }) {
               <th>Cantidad Total Vendida</th>
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            {bestProducts.map((product) => (
+              <tr key={product.menu_id}>
+                <td>{product.productName || '-'}</td>
+                <td>{product.type || '-'}</td>
+                <td>{product.size || '-'}</td>
+                <td>{product.totalQuantitySold ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>
@@ -308,7 +361,16 @@ export default function AdminDashboard({ user, onLogout }) {
               <th>Órdenes Totales</th>
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            {salesTrend.map((item) => (
+              <tr key={`${item.year}-${item.month}`}>
+                <td>{item.year ?? '-'}</td>
+                <td>{item.month ?? '-'}</td>
+                <td>${Number(item.totalSales ?? 0).toFixed(2)}</td>
+                <td>{item.totalOrders ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>
