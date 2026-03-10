@@ -56,6 +56,11 @@ const normalizeAddress = (address, index = 0) => ({
 const normalizeRestaurant = (restaurant) => {
   const location = restaurant.address || restaurant.location || {};
   const rawAddress = typeof restaurant.address === 'string' ? restaurant.address : '';
+  const rawNotAvailable = Array.isArray(restaurant.not_available_products)
+    ? restaurant.not_available_products
+    : Array.isArray(restaurant.not_available_items)
+      ? restaurant.not_available_items
+      : [];
 
   return {
     _id: restaurant.restaurant_id || restaurant._id || restaurant.id,
@@ -74,7 +79,7 @@ const normalizeRestaurant = (restaurant) => {
       Open: restaurant.hours?.Open || '-',
       Close: restaurant.hours?.Close || '-',
     },
-    not_available_products: restaurant.not_available_products || [],
+    not_available_products: rawNotAvailable.map((itemId) => String(itemId)),
   };
 };
 
@@ -486,8 +491,35 @@ export const updateAdminMenuStock = async () => {
   throw new Error('El backend actual no expone un endpoint para actualizar stock de menú.');
 };
 
-export const disableProductsForRestaurants = async () => {
-  throw new Error('El backend actual no expone un endpoint para deshabilitar productos por restaurante.');
+export const disableProductsForRestaurants = async (payload = {}) => {
+  const restaurantIds = Array.isArray(payload?.restaurantIds) ? payload.restaurantIds : [];
+  const menuIds = Array.isArray(payload?.menuIds) ? payload.menuIds : [];
+
+  if (!restaurantIds.length || !menuIds.length) {
+    throw new Error('Debes seleccionar al menos un restaurante y un producto.');
+  }
+
+  const restaurants_ids = [...new Set(restaurantIds.map((id) => String(id).trim()).filter(Boolean))];
+
+  const items_ids = [...new Set(
+    menuIds
+      .map((menuId) => resolveMenuIdForOrder('', menuId))
+      .map((id) => String(id).trim())
+      .filter(Boolean),
+  )];
+
+  const requestBody = {
+    items_ids,
+    restaurants_ids,
+  };
+
+  return requestJson('/unavailable-items', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
 };
 
 const normalizeOrderPayload = (orderPayload) => {

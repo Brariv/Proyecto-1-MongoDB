@@ -114,13 +114,37 @@ export default function AdminDashboard({ user, onLogout }) {
     }
 
     try {
+      const selectedRestaurantIdsSnapshot = [...selectedRestaurantIds];
+      const selectedMenuIdsSnapshot = [...selectedMenuIds].map((id) => String(id));
+
       await disableProductsForRestaurants({
-        restaurantIds: selectedRestaurantIds,
-        menuIds: selectedMenuIds,
+        restaurantIds: selectedRestaurantIdsSnapshot,
+        menuIds: selectedMenuIdsSnapshot,
       });
 
       const refreshedLocations = await getAllLocations();
-      setLocations(refreshedLocations);
+
+      const mergeUnavailableItems = (sourceLocations) =>
+        sourceLocations.map((restaurant) => {
+          if (!selectedRestaurantIdsSnapshot.includes(restaurant._id)) {
+            return restaurant;
+          }
+
+          return {
+            ...restaurant,
+            not_available_products: [...selectedMenuIdsSnapshot],
+          };
+        });
+
+      const hasUnavailableData = refreshedLocations.some(
+        (restaurant) => (restaurant.not_available_products?.length ?? 0) > 0,
+      );
+
+      setLocations(
+        hasUnavailableData
+          ? refreshedLocations
+          : mergeUnavailableItems(refreshedLocations),
+      );
       setSelectedRestaurantIds([]);
       setSelectedMenuIds([]);
       setAdminMessage('Productos deshabilitados en los restaurantes seleccionados.');
