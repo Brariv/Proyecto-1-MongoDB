@@ -190,7 +190,7 @@ def get_menu(restaurant_id: str):
     menu_items = []
     for item in menu:
         if item["_id"] not in not_available_items.get("not_available_items", []):
-            menu_items.append({"pizza": item["Pizza"],"type":item["Type"],"size":item["Size"], "price": item["Price"]})
+            menu_items.append({"id": str(item["_id"]), "pizza": item["Pizza"], "type": item["Type"], "size": item["Size"], "price": item["Price"]})
 
     
     if menu:
