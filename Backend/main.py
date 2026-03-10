@@ -99,7 +99,11 @@ def restaurant_names():
 
 @app.get("/restaurants/{restaurant_id}/menu")
 def menu(restaurant_id: str):
-    return get_menu(restaurant_id)
+    return get_menu_restaurant(restaurant_id)
+
+@app.get("/menu")
+def menu():
+    return get_menu()
 
 
 @app.get("/restaurants/near")

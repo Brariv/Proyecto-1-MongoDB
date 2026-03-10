@@ -178,7 +178,7 @@ def create_address(user_id: str, alias: str, address: str, city: str, state: str
     else:
         return {"message": "Failed to create address"}, 500
     
-def get_menu(restaurant_id: str):
+def get_menu_restaurant(restaurant_id: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     menu_collection = db["menu"]
@@ -197,6 +197,15 @@ def get_menu(restaurant_id: str):
         return {"menu": menu_items}
     else:
         return {"message": "Menu not found for this restaurant"}, 404
+    
+def get_menu():
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    menu_collection = db["menu"]
+    
+    menu = menu_collection.find()
+    
+    return [{"id": str(item["_id"]), "pizza": item["Pizza"], "type": item["Type"], "size": item["Size"], "price": item["Price"]} for item in menu]
     
 def get_near_restaurants(latitude: float, longitude: float):
     client = MongoClient(mongo_uri)
