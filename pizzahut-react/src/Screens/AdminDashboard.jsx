@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ListChecks, ShieldAlert, Minus, Plus, Save, LogOut, BarChart3, TrendingUp, ShoppingBasket, ChartLine } from 'lucide-react';
+import { ListChecks, ShieldAlert, Plus, LogOut, BarChart3, TrendingUp, ShoppingBasket, ChartLine, Trash2, X } from 'lucide-react';
 import {
   getBestSellingProducts,
+  createAdminMenuItem,
+  deleteAdminMenuItem,
   disableProductsForRestaurants,
   getAdminMenuItems,
   getAllLocations,
   getMonthlySalesTrend,
   getSalesByState,
   getTopRatedRestaurants,
-  updateAdminMenuStock,
 } from '../services/dashboardService';
 
 const ADMIN_SECTIONS = {
@@ -25,14 +26,33 @@ export default function AdminDashboard({ user, onLogout }) {
   const [activeSection, setActiveSection] = useState(ADMIN_SECTIONS.menu);
   const [menuItems, setMenuItems] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [stockByMenuId, setStockByMenuId] = useState({});
   const [selectedRestaurantIds, setSelectedRestaurantIds] = useState([]);
   const [selectedMenuIds, setSelectedMenuIds] = useState([]);
   const [adminMessage, setAdminMessage] = useState('');
+  const [isCreateMenuModalOpen, setIsCreateMenuModalOpen] = useState(false);
+  const [newMenuItemForm, setNewMenuItemForm] = useState({
+    pizza: '',
+    type: '',
+    size: '',
+    price: '',
+    available_until: '',
+  });
   const [bestRestaurants, setBestRestaurants] = useState([]);
   const [salesByState, setSalesByState] = useState([]);
   const [bestProducts, setBestProducts] = useState([]);
   const [salesTrend, setSalesTrend] = useState([]);
+
+  useEffect(() => {
+    if (!adminMessage) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setAdminMessage('');
+    }, 3000);
+
+    return () => window.clearTimeout(timer);
+  }, [adminMessage]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,12 +79,6 @@ export default function AdminDashboard({ user, onLogout }) {
         setSalesByState(salesByStateData);
         setBestProducts(bestSellers);
         setSalesTrend(monthlyTrend);
-        setStockByMenuId(
-          adminMenuItems.reduce((acc, item) => {
-            acc[item._id] = item.Stock ?? 0;
-            return acc;
-          }, {}),
-        );
       } catch (loadError) {
         console.error(loadError);
         setAdminMessage(loadError.message || 'No se pudieron cargar los datos de administrador.');
@@ -74,29 +88,63 @@ export default function AdminDashboard({ user, onLogout }) {
     loadData();
   }, []);
 
-  const updateStock = (menuId, delta) => {
-    setStockByMenuId((previous) => {
-      const currentValue = previous[menuId] ?? 0;
-      return {
-        ...previous,
-        [menuId]: Math.max(0, currentValue + delta),
-      };
+  const resetNewMenuItemForm = () => {
+    setNewMenuItemForm({
+      pizza: '',
+      type: '',
+      size: '',
+      price: '',
+      available_until: '',
     });
   };
 
-  const handleSaveStock = async () => {
-    const stockUpdates = menuItems.map((item) => ({
-      Menu_id: item._id,
-      Stock: stockByMenuId[item._id] ?? 0,
-    }));
+  const handleCreateMenuItem = async () => {
+    const priceValue = Number(newMenuItemForm.price);
+
+    if (!newMenuItemForm.pizza.trim() || !newMenuItemForm.type.trim() || !newMenuItemForm.size.trim()) {
+      setAdminMessage('Completa pizza, tipo y tamaño para crear el item.');
+      return;
+    }
+
+    if (!Number.isFinite(priceValue) || priceValue <= 0) {
+      setAdminMessage('El precio debe ser un número mayor que 0.');
+      return;
+    }
 
     try {
-      await updateAdminMenuStock(stockUpdates);
+      await createAdminMenuItem({
+        pizza: newMenuItemForm.pizza,
+        type: newMenuItemForm.type,
+        size: newMenuItemForm.size,
+        price: priceValue,
+        available_until: newMenuItemForm.available_until || null,
+      });
+
       const refreshedMenu = await getAdminMenuItems();
       setMenuItems(refreshedMenu);
-      setAdminMessage('Cambios de inventario guardados correctamente.');
-    } catch (saveError) {
-      setAdminMessage(saveError.message || 'No se pudo guardar el inventario.');
+      setIsCreateMenuModalOpen(false);
+      resetNewMenuItemForm();
+      setAdminMessage('Item de menú creado correctamente.');
+    } catch (createError) {
+      setAdminMessage(createError.message || 'No se pudo crear el item del menú.');
+    }
+  };
+
+  const handleDeleteMenuItem = async (itemId) => {
+    const normalizedId = String(itemId ?? '').trim();
+
+    if (!/^[a-f0-9]{24}$/i.test(normalizedId)) {
+      setAdminMessage('Este item no tiene un id válido para eliminarse desde backend.');
+      return;
+    }
+
+    try {
+      await deleteAdminMenuItem(normalizedId);
+      const refreshedMenu = await getAdminMenuItems();
+      setMenuItems(refreshedMenu);
+      setAdminMessage('Item de menú eliminado correctamente.');
+    } catch (deleteError) {
+      setAdminMessage(deleteError.message || 'No se pudo eliminar el item del menú.');
     }
   };
 
@@ -164,12 +212,12 @@ export default function AdminDashboard({ user, onLogout }) {
     <section className="dashboard-panel">
       <div className="menu-header">
         <h2>Menú</h2>
-        <button type="button" className="send-order-button" onClick={handleSaveStock}>
-          <Save size={16} /> Guardar
+        <button type="button" className="new-review-button" onClick={() => setIsCreateMenuModalOpen(true)}>
+          <Plus size={16} /> Añadir item
         </button>
       </div>
 
-      <p>Administra el inventario de productos del menú.</p>
+      <p>Administra los items del menú.</p>
 
       <div className="menu-table-wrapper">
         <table className="menu-table">
@@ -179,12 +227,11 @@ export default function AdminDashboard({ user, onLogout }) {
               <th>Tipo</th>
               <th>Tamaño</th>
               <th>Precio</th>
-              <th>Cantidad</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {menuItems.map((item) => {
-              const quantity = stockByMenuId[item._id] ?? 0;
               return (
                 <tr key={item._id}>
                   <td>{item.Pizza}</td>
@@ -192,15 +239,13 @@ export default function AdminDashboard({ user, onLogout }) {
                   <td>{item.Size}</td>
                   <td>${item.Price.toFixed(2)}</td>
                   <td>
-                    <div className="qty-controls">
-                      <button type="button" onClick={() => updateStock(item._id, -1)}>
-                        <Minus size={15} />
-                      </button>
-                      <span>{quantity}</span>
-                      <button type="button" onClick={() => updateStock(item._id, 1)}>
-                        <Plus size={15} />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className="edit-review-button"
+                      onClick={() => handleDeleteMenuItem(item._id)}
+                    >
+                      <Trash2 size={14} /> Eliminar
+                    </button>
                   </td>
                 </tr>
               );
@@ -208,6 +253,90 @@ export default function AdminDashboard({ user, onLogout }) {
           </tbody>
         </table>
       </div>
+
+      {isCreateMenuModalOpen ? (
+        <div className="review-modal-overlay">
+          <div className="review-modal">
+            <button type="button" className="close-modal-button" onClick={() => setIsCreateMenuModalOpen(false)}>
+              <X size={16} />
+            </button>
+
+            <h3>Crear item de menú</h3>
+
+            <div className="review-form-grid">
+              <label>
+                Pizza
+                <input
+                  value={newMenuItemForm.pizza}
+                  onChange={(event) =>
+                    setNewMenuItemForm((prev) => ({ ...prev, pizza: event.target.value }))
+                  }
+                />
+              </label>
+
+              <label>
+                Tipo
+                <input
+                  value={newMenuItemForm.type}
+                  onChange={(event) =>
+                    setNewMenuItemForm((prev) => ({ ...prev, type: event.target.value }))
+                  }
+                />
+              </label>
+
+              <label>
+                Tamaño
+                <input
+                  value={newMenuItemForm.size}
+                  onChange={(event) =>
+                    setNewMenuItemForm((prev) => ({ ...prev, size: event.target.value }))
+                  }
+                />
+              </label>
+
+              <label>
+                Precio
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newMenuItemForm.price}
+                  onChange={(event) =>
+                    setNewMenuItemForm((prev) => ({ ...prev, price: event.target.value }))
+                  }
+                />
+              </label>
+
+              <label className="full-width">
+                Disponible hasta (opcional)
+                <input
+                  value={newMenuItemForm.available_until}
+                  onChange={(event) =>
+                    setNewMenuItemForm((prev) => ({ ...prev, available_until: event.target.value }))
+                  }
+                  placeholder="forever"
+                />
+              </label>
+            </div>
+
+            <div className="review-modal-actions">
+              <button
+                type="button"
+                className="back-button"
+                onClick={() => {
+                  setIsCreateMenuModalOpen(false);
+                  resetNewMenuItemForm();
+                }}
+              >
+                Cancelar
+              </button>
+              <button type="button" className="send-order-button" onClick={handleCreateMenuItem}>
+                Crear item
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 

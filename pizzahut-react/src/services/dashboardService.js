@@ -456,15 +456,50 @@ export const getMenuByRestaurant = async (restaurantId) => {
 };
 
 export const getAdminMenuItems = async () => {
-  const restaurantNamesResponse = await requestJson('/restaurants/names');
-  const restaurantNames = Array.isArray(restaurantNamesResponse) ? restaurantNamesResponse : [];
-  const firstRestaurantId = restaurantNames[0]?.restaurant_id;
+  const menuResponse = await requestJson('/menu');
+  const menuItems = Array.isArray(menuResponse) ? menuResponse : [];
 
-  if (!firstRestaurantId) {
-    return [];
+  return menuItems.map((item, index) => ({
+    _id: item.id || item._id || item.menu_id || `menu-item-${index}`,
+    menu_id: item.id || item._id || item.menu_id || `menu-item-${index}`,
+    Pizza: item.pizza || item.Pizza || '',
+    Type: item.type || item.Type || '',
+    Size: item.size || item.Size || '',
+    Price: Number(item.price ?? item.Price ?? 0),
+    Stock: Number(item.stock ?? item.Stock ?? 0),
+  }));
+};
+
+export const createAdminMenuItem = async (payload = {}) => {
+  const requestBody = {
+    pizza: String(payload?.pizza ?? '').trim(),
+    type: String(payload?.type ?? '').trim(),
+    size: String(payload?.size ?? '').trim(),
+    price: Number(payload?.price ?? 0),
+    available_until: payload?.available_until ? String(payload.available_until).trim() : null,
+  };
+
+  return requestJson('/menu', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+};
+
+export const deleteAdminMenuItem = async (itemId) => {
+  const normalizedItemId = String(itemId ?? '').trim();
+  if (!normalizedItemId) {
+    throw new Error('Falta el id del item de menú.');
   }
 
-  return getMenuByRestaurant(firstRestaurantId);
+  return requestJson(`/menu/${normalizedItemId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 };
 
 export const getTopRatedRestaurants = async () => {
