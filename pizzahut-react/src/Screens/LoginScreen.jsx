@@ -6,10 +6,13 @@ export default function LoginScreen() {
 	const { login, error } = useAuth();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
-		login(email, password);
+		setIsSubmitting(true);
+		await login(email, password);
+		setIsSubmitting(false);
 	};
 
 	return (
@@ -17,7 +20,7 @@ export default function LoginScreen() {
 			<section className="login-card">
 				<img src="/logo.png" alt="Pizza Hut" className="brand-logo" />
 				<h1 className="brand-title">Pizza Hut Login</h1>
-				<p className="brand-subtitle">Simulación de acceso para usuario y administrador</p>
+				<p className="brand-subtitle">Ingresa tus credenciales para acceder</p>
 
 				<form onSubmit={handleSubmit} className="login-form">
 					<label className="input-group">
@@ -44,20 +47,10 @@ export default function LoginScreen() {
 
 					{error ? <p className="error-text">{error}</p> : null}
 
-					<button className="login-button" type="submit">
-						Iniciar sesión
+					<button className="login-button" type="submit" disabled={isSubmitting}>
+						{isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
 					</button>
 				</form>
-
-				<div className="credentials-box">
-					<p>Credenciales de prueba:</p>
-					<p>
-						Admin: <strong>admin@pizzahut.com</strong> / <strong>admin123</strong>
-					</p>
-					<p>
-						Usuario: <strong>user@pizzahut.com</strong> / <strong>user123</strong>
-					</p>
-				</div>
 			</section>
 		</main>
 	);

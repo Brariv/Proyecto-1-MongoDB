@@ -5,15 +5,19 @@ import AdminDashboard from './Screens/AdminDashboard';
 import UserDashboard from './Screens/UserDashboard';
 
 export default function App() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, isInitializing } = useAuth();
+
+  if (isInitializing) {
+    return null;
+  }
 
   if (!currentUser) {
     return <LoginScreen />;
   }
 
-  if (currentUser.role === 'user') {
-    return <UserDashboard onLogout={logout} user={currentUser} />;
+  if (currentUser.role === 'admin') {
+    return <AdminDashboard onLogout={logout} user={currentUser} />;
   }
 
-  return <AdminDashboard onLogout={logout} user={currentUser} />;
+  return <UserDashboard onLogout={logout} user={currentUser} />;
 }

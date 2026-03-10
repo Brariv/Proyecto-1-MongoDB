@@ -1,228 +1,32 @@
-const USE_MOCK_DATA = true;
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const MENU_ID_OFFSET_FROM_RESTAURANT = 0x32n;
+const MENU_CACHE = new Map();
+const MENU_REQUESTS_IN_FLIGHT = new Map();
+const ORDERED_RESTAURANTS_CACHE = new Map();
+const ORDERED_RESTAURANTS_IN_FLIGHT = new Map();
+const USER_REVIEWS_CACHE = new Map();
+const USER_REVIEWS_IN_FLIGHT = new Map();
 
-// Endpoints planeados para backend (descomentar al integrar API real):
-// GET    `${API_BASE_URL}/users/:userId`
-// PATCH  `${API_BASE_URL}/users/:userId`
-// GET    `${API_BASE_URL}/restaurants`
-// GET    `${API_BASE_URL}/reviews?user_id=:userId`
-// PATCH  `${API_BASE_URL}/reviews/:reviewId`
-// POST   `${API_BASE_URL}/reviews`
-// GET    `${API_BASE_URL}/users/:userId/reviewable-restaurants`
-// GET    `${API_BASE_URL}/orders?user_id=:userId`
-// GET    `${API_BASE_URL}/menu?restaurant_id=:restaurantId`
-// GET    `${API_BASE_URL}/admin/menu`
-// PATCH  `${API_BASE_URL}/admin/menu/stock`
-// PATCH  `${API_BASE_URL}/admin/restaurants/products/availability`
-// GET    `${API_BASE_URL}/admin/analytics/best-restaurants`
-// GET    `${API_BASE_URL}/admin/analytics/sales-by-state`
-// GET    `${API_BASE_URL}/admin/analytics/best-products`
-// GET    `${API_BASE_URL}/admin/analytics/monthly-sales-trend`
-// POST   `${API_BASE_URL}/orders`
+const requestJson = async (path, options = {}) => {
+  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  let payload = null;
 
-let MOCK_USERS = [
-  {
-    _id: 'user-001',
-    name: 'Cliente Pizza Hut',
-    email: 'user@pizzahut.com',
-    password: 'hashed_password',
-    phone: '+555-100-2001',
-    addresses: [
-      {
-        id: 'addr-001',
-        alias: 'Casa',
-        address: '456 Elm Street',
-        city: 'Anytown',
-        latitude: 40.7128,
-        longitude: -74.006,
-      },
-      {
-        id: 'addr-002',
-        alias: 'Trabajo',
-        address: '30 Park Avenue',
-        city: 'Anytown',
-        latitude: 40.7198,
-        longitude: -74.002,
-      },
-    ],
-    reviews_id: ['rev-001', 'rev-002'],
-  },
-];
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
 
-let MOCK_RESTAURANTS = [
-  {
-    _id: 'rest-001',
-    state: 'NY',
-    city: 'Anytown',
-    location: {
-      address1: '123 Main Street',
-      address2: 'Suite 100',
-      postal_code: '12345',
-      latitude: 40.713,
-      longitude: -74.0058,
-    },
-    hours: {
-      Open: '10:00 AM',
-      Close: '10:00 PM',
-    },
-    type: 'Pizza Hut Express',
-    phone: '555-123-4567',
-    not_available_products: [],
-  },
-  {
-    _id: 'rest-002',
-    state: 'NY',
-    city: 'Anytown',
-    location: {
-      address1: '80 Lexington Ave',
-      address2: 'Local 2',
-      postal_code: '12346',
-      latitude: 40.72,
-      longitude: -74.001,
-    },
-    hours: {
-      Open: '09:00 AM',
-      Close: '11:00 PM',
-    },
-    type: 'Pizza Hut',
-    phone: '555-987-1212',
-    not_available_products: [],
-  },
-  {
-    _id: 'rest-003',
-    state: 'NY',
-    city: 'Anytown',
-    location: {
-      address1: '14 Broadway',
-      address2: 'Piso 1',
-      postal_code: '12340',
-      latitude: 40.7075,
-      longitude: -74.01,
-    },
-    hours: {
-      Open: '10:30 AM',
-      Close: '10:30 PM',
-    },
-    type: 'Pizza Hut Delivery',
-    phone: '555-110-8899',
-    not_available_products: [],
-  },
-];
+  if (!response.ok) {
+    throw new Error(payload?.detail || payload?.message || `Error ${response.status}`);
+  }
 
-let MOCK_REVIEWS = [
-  {
-    _id: 'rev-001',
-    stars: 5,
-    date: '2024-06-01T12:00:00Z',
-    comment: 'Amazing food and great service!',
-    restaurant_id: 'rest-001',
-    user_id: 'user-001',
-  },
-  {
-    _id: 'rev-002',
-    stars: 4,
-    date: '2024-06-05T18:30:00Z',
-    comment: 'La pizza llegó caliente y a tiempo.',
-    restaurant_id: 'rest-002',
-    user_id: 'user-001',
-  },
-];
+  if (Array.isArray(payload) && payload.length > 1 && Number(payload[1]) >= 400) {
+    throw new Error(payload[0]?.message || `Error ${payload[1]}`);
+  }
 
-const MOCK_ORDERS = [
-  {
-    _id: 'ord-001',
-    User_id: 'user-001',
-    Restaurant_id: 'rest-001',
-    Total: 26.48,
-    Items: [
-      {
-        Menu_id: 'menu-001',
-        Quantity: 2,
-        Price: 12.99,
-      },
-    ],
-    Order_date: '2026-02-10T18:30:00Z',
-    Payment_method: 'Credit Card',
-  },
-  {
-    _id: 'ord-002',
-    User_id: 'user-001',
-    Restaurant_id: 'rest-003',
-    Total: 8.99,
-    Items: [
-      {
-        Menu_id: 'menu-005',
-        Quantity: 1,
-        Price: 8.99,
-      },
-    ],
-    Order_date: '2026-03-01T20:05:00Z',
-    Payment_method: 'Cash',
-  },
-];
-
-let MOCK_MENU_ITEMS = [
-  {
-    _id: 'menu-001',
-    Pizza: 'Super Supreme Pizza (Pan Pizza)',
-    Type: 'Classic Recipe Pizzas',
-    Size: 'Large',
-    Price: 12.99,
-    Stock: 40,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-001',
-  },
-  {
-    _id: 'menu-002',
-    Pizza: 'Pepperoni Lover\'s Pizza',
-    Type: 'Classic Recipe Pizzas',
-    Size: 'Medium',
-    Price: 10.99,
-    Stock: 35,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-001',
-  },
-  {
-    _id: 'menu-003',
-    Pizza: 'Veggie Lover\'s Pizza',
-    Type: 'Vegetarian Pizzas',
-    Size: 'Large',
-    Price: 11.49,
-    Stock: 22,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-002',
-  },
-  {
-    _id: 'menu-004',
-    Pizza: 'Meat Lover\'s Pizza',
-    Type: 'Classic Recipe Pizzas',
-    Size: 'Large',
-    Price: 13.49,
-    Stock: 18,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-002',
-  },
-  {
-    _id: 'menu-005',
-    Pizza: 'Hawaiian Chicken Pizza',
-    Type: 'Specialty Pizzas',
-    Size: 'Personal',
-    Price: 8.99,
-    Stock: 26,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-003',
-  },
-  {
-    _id: 'menu-006',
-    Pizza: 'Cheese Pizza',
-    Type: 'Classic Recipe Pizzas',
-    Size: 'Large',
-    Price: 9.99,
-    Stock: 31,
-    available_until: '2026-12-31T23:59:59Z',
-    restaurant_id: 'rest-003',
-  },
-];
+  return payload;
+};
 
 const getDistanceKm = (latitudeA, longitudeA, latitudeB, longitudeB) => {
   const radius = 6371;
@@ -238,143 +42,303 @@ const getDistanceKm = (latitudeA, longitudeA, latitudeB, longitudeB) => {
   return radius * c;
 };
 
-export const getUserProfile = async (userId) => {
-  if (USE_MOCK_DATA) {
-    const foundUser = MOCK_USERS.find((user) => user._id === userId) ?? null;
-    return foundUser ? JSON.parse(JSON.stringify(foundUser)) : null;
+const normalizeAddress = (address, index = 0) => ({
+  id: address.id || address._id || `server-addr-${index + 1}`,
+  alias: address.alias || `Dirección ${index + 1}`,
+  address: address.address || '',
+  city: address.city || '',
+  state: address.state || '',
+  postal_code: address.postal_code || '',
+  latitude: Number(address.latitude) || Number(address.geo?.coordinates?.[1]) || 0,
+  longitude: Number(address.longitude) || Number(address.geo?.coordinates?.[0]) || 0,
+});
+
+const normalizeRestaurant = (restaurant) => {
+  const location = restaurant.address || restaurant.location || {};
+
+  return {
+    _id: restaurant.restaurant_id || restaurant._id || restaurant.id,
+    type: restaurant.type || restaurant.name || 'Pizza Hut',
+    state: restaurant.state || '',
+    city: restaurant.city || '',
+    phone: restaurant.phone || '',
+    location: {
+      address1: location.address1 || restaurant.address || '',
+      address2: location.address2 || '',
+      postal_code: location.postal_code || '',
+      latitude: Number(location.latitude) || Number(location.geo?.coordinates?.[1]) || 0,
+      longitude: Number(location.longitude) || Number(location.geo?.coordinates?.[0]) || 0,
+    },
+    hours: {
+      Open: restaurant.hours?.Open || '-',
+      Close: restaurant.hours?.Close || '-',
+    },
+    not_available_products: restaurant.not_available_products || [],
+  };
+};
+
+const normalizeReview = (review, fallbackUserId, fallbackRestaurantId) => ({
+  _id: review.review_id || review._id || review.id,
+  stars: Number(review.stars || 0),
+  comment: review.comment || '',
+  date: review.date || new Date().toISOString(),
+  user_id: review.user_id || fallbackUserId,
+  restaurant_id: review.restaurant_id || fallbackRestaurantId,
+});
+
+const toHexObjectId = (numericValue) => {
+  const hex = numericValue.toString(16);
+  return hex.padStart(24, '0').slice(-24);
+};
+
+const resolveMenuIdForOrder = (restaurantId, menuId) => {
+  const rawMenuId = String(menuId ?? '').trim();
+  if (!rawMenuId) {
+    return '';
   }
 
-  const response = await fetch(`${API_BASE_URL}/users/${userId}`);
-  if (!response.ok) {
-    throw new Error('No se pudo cargar el perfil del usuario');
+  if (/^[a-f0-9]{24}$/i.test(rawMenuId)) {
+    return rawMenuId;
   }
-  return response.json();
+
+  const syntheticMatch = rawMenuId.match(/^([a-f0-9]{24})-(\d+)$/i);
+  if (!syntheticMatch) {
+    return rawMenuId;
+  }
+
+  const [, syntheticRestaurantId, menuIndexValue] = syntheticMatch;
+  const effectiveRestaurantId = /^[a-f0-9]{24}$/i.test(String(restaurantId ?? ''))
+    ? String(restaurantId).trim()
+    : syntheticRestaurantId;
+
+  const index = Number(menuIndexValue);
+  if (!Number.isInteger(index) || index < 0) {
+    return rawMenuId;
+  }
+
+  try {
+    const baseNumeric = BigInt(`0x${effectiveRestaurantId}`);
+    return toHexObjectId(baseNumeric + MENU_ID_OFFSET_FROM_RESTAURANT + BigInt(index));
+  } catch {
+    return rawMenuId;
+  }
+};
+
+export const getUserProfile = async (userId, options = {}) => {
+  const query = options?.cacheBust ? `?t=${Date.now()}` : '';
+  const response = await requestJson(`/users/${userId}/addresses${query}`, options?.noCache ? { cache: 'no-store' } : undefined);
+  const addresses = Array.isArray(response?.addresses)
+    ? response.addresses
+    : Array.isArray(response?.address)
+      ? response.address
+      : [];
+
+  return {
+    _id: userId,
+    name: '',
+    email: '',
+    password: 'hashed_password',
+    phone: '',
+    addresses: addresses.map(normalizeAddress),
+    reviews_id: [],
+  };
 };
 
 export const updateUserProfile = async (userId, updatePayload) => {
-  if (USE_MOCK_DATA) {
-    MOCK_USERS = MOCK_USERS.map((user) => {
-      if (user._id !== userId) {
-        return user;
-      }
-      return {
-        ...user,
-        ...updatePayload,
-      };
-    });
+  const pendingAddresses = (updatePayload?.addresses || []).filter((address) =>
+    String(address.id).startsWith('local-'),
+  );
 
-    const updated = MOCK_USERS.find((user) => user._id === userId) ?? null;
-    return updated ? JSON.parse(JSON.stringify(updated)) : null;
+  await Promise.all(
+    pendingAddresses.map((address) =>
+      requestJson(`/users/${userId}/addresses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alias: address.alias,
+          address: address.address,
+          city: address.city,
+          state: address.state || '',
+          postal_code: address.postal_code || '',
+        }),
+      }),
+    ),
+  );
+
+  return getUserProfile(userId);
+};
+
+export const createUserAddress = async (userId, addressPayload) => {
+  if (!userId) {
+    throw new Error('Falta userId');
   }
 
-  const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-    method: 'PATCH',
+  const payload = addressPayload || {};
+
+  return requestJson(`/users/${userId}/addresses`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(updatePayload),
+    body: JSON.stringify({
+      alias: payload.alias || '',
+      address: payload.address || '',
+      city: payload.city || '',
+      state: payload.state || '',
+      postal_code: payload.postal_code || '',
+    }),
   });
+};
 
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar el perfil del usuario');
+export const deleteUserAddress = async (userId, addressValue) => {
+  if (!userId) {
+    throw new Error('Falta userId');
   }
 
-  return response.json();
+  const trimmed = String(addressValue ?? '').trim();
+  if (!trimmed) {
+    throw new Error('Falta address');
+  }
+
+  return requestJson(`/users/${userId}/addresses`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      address: trimmed,
+    }),
+  });
 };
 
 export const getAllLocations = async () => {
-  if (USE_MOCK_DATA) {
-    return JSON.parse(JSON.stringify(MOCK_RESTAURANTS));
-  }
-
-  const response = await fetch(`${API_BASE_URL}/restaurants`);
-  if (!response.ok) {
-    throw new Error('No se pudieron cargar las localizaciones');
-  }
-  return response.json();
+  const response = await requestJson('/restaurants');
+  const restaurants = Array.isArray(response) ? response : [];
+  return restaurants.map(normalizeRestaurant);
 };
 
 export const getNearbyLocationsByAddress = async (address) => {
   const locations = await getAllLocations();
   return locations
-    .map((restaurant) => {
-      const distance = getDistanceKm(
-        address.latitude,
-        address.longitude,
-        restaurant.location.latitude,
-        restaurant.location.longitude,
-      );
-      return {
-        ...restaurant,
-        distanceKm: Number(distance.toFixed(2)),
-      };
-    })
+    .map((restaurant) => ({
+      ...restaurant,
+      distanceKm: Number(
+        getDistanceKm(
+          Number(address?.latitude) || 0,
+          Number(address?.longitude) || 0,
+          restaurant.location.latitude,
+          restaurant.location.longitude,
+        ).toFixed(2),
+      ),
+    }))
     .sort((first, second) => first.distanceKm - second.distanceKm)
     .slice(0, 3);
 };
 
 export const getUserReviews = async (userId) => {
-  if (USE_MOCK_DATA) {
-    return MOCK_REVIEWS.filter((review) => review.user_id === userId);
+  if (!userId) {
+    return [];
   }
 
-  const response = await fetch(`${API_BASE_URL}/reviews?user_id=${userId}`);
-  if (!response.ok) {
-    throw new Error('No se pudieron cargar las reseñas del usuario');
+  if (USER_REVIEWS_CACHE.has(userId)) {
+    return USER_REVIEWS_CACHE.get(userId);
   }
-  return response.json();
+
+  if (USER_REVIEWS_IN_FLIGHT.has(userId)) {
+    return USER_REVIEWS_IN_FLIGHT.get(userId);
+  }
+
+  const pendingRequest = (async () => {
+    const orderedRestaurants = await getRestaurantsOrderedByUser(userId);
+    const restaurants = Array.isArray(orderedRestaurants) ? orderedRestaurants : [];
+
+    const reviewRequests = restaurants
+      .map((restaurant) => restaurant.restaurant_id)
+      .filter(Boolean)
+      .map((restaurantId) =>
+        requestJson(`/reviews/${userId}?restaurant_id=${encodeURIComponent(restaurantId)}`)
+          .then((review) => normalizeReview(review, userId, restaurantId))
+          .catch(() => null),
+      );
+
+    const reviews = await Promise.all(reviewRequests);
+    const normalizedReviews = reviews.filter((review) => review && review._id);
+    USER_REVIEWS_CACHE.set(userId, normalizedReviews);
+    return normalizedReviews;
+  })();
+
+  USER_REVIEWS_IN_FLIGHT.set(userId, pendingRequest);
+
+  try {
+    return await pendingRequest;
+  } finally {
+    USER_REVIEWS_IN_FLIGHT.delete(userId);
+  }
 };
 
-export const getUserOrders = async (userId) => {
-  if (USE_MOCK_DATA) {
-    return MOCK_ORDERS.filter((order) => order.User_id === userId);
+const getRestaurantsOrderedByUser = async (userId) => {
+  if (!userId) {
+    return [];
   }
 
-  const response = await fetch(`${API_BASE_URL}/orders?user_id=${userId}`);
-  if (!response.ok) {
-    throw new Error('No se pudieron cargar las órdenes del usuario');
+  if (ORDERED_RESTAURANTS_CACHE.has(userId)) {
+    return ORDERED_RESTAURANTS_CACHE.get(userId);
   }
-  return response.json();
+
+  if (ORDERED_RESTAURANTS_IN_FLIGHT.has(userId)) {
+    return ORDERED_RESTAURANTS_IN_FLIGHT.get(userId);
+  }
+
+  const pendingRequest = (async () => {
+    const orderedRestaurants = await requestJson(`/restaurants/ordered/${userId}`);
+    const restaurants = Array.isArray(orderedRestaurants) ? orderedRestaurants : [];
+    ORDERED_RESTAURANTS_CACHE.set(userId, restaurants);
+    return restaurants;
+  })();
+
+  ORDERED_RESTAURANTS_IN_FLIGHT.set(userId, pendingRequest);
+
+  try {
+    return await pendingRequest;
+  } finally {
+    ORDERED_RESTAURANTS_IN_FLIGHT.delete(userId);
+  }
 };
 
 export const getReviewableRestaurants = async (userId) => {
-  if (USE_MOCK_DATA) {
-    const userOrders = MOCK_ORDERS.filter((order) => order.User_id === userId);
-    const orderedRestaurantIds = [...new Set(userOrders.map((order) => order.Restaurant_id))];
-    const reviewedRestaurantIds = new Set(
-      MOCK_REVIEWS.filter((review) => review.user_id === userId).map((review) => review.restaurant_id),
-    );
+  const [orderedRestaurants, userReviews] = await Promise.all([
+    getRestaurantsOrderedByUser(userId),
+    getUserReviews(userId),
+  ]);
 
-    return MOCK_RESTAURANTS.filter(
-      (restaurant) =>
-        orderedRestaurantIds.includes(restaurant._id) && !reviewedRestaurantIds.has(restaurant._id),
-    );
-  }
+  const restaurants = (Array.isArray(orderedRestaurants) ? orderedRestaurants : []).map((restaurant) => ({
+    _id: restaurant.restaurant_id,
+    type: restaurant.name || 'Pizza Hut',
+    city: '',
+    state: '',
+    phone: '',
+    location: {
+      address1: restaurant.address || '',
+      address2: '',
+      postal_code: '',
+      latitude: 0,
+      longitude: 0,
+    },
+    hours: {
+      Open: '-',
+      Close: '-',
+    },
+    not_available_products: [],
+  }));
 
-  const response = await fetch(`${API_BASE_URL}/users/${userId}/reviewable-restaurants`);
-  if (!response.ok) {
-    throw new Error('No se pudieron cargar los restaurantes para reseñar');
-  }
-  return response.json();
+  const reviewedRestaurantIds = new Set(userReviews.map((review) => review.restaurant_id));
+  return restaurants.filter((restaurant) => !reviewedRestaurantIds.has(restaurant._id));
 };
 
 export const updateReview = async (reviewId, updatePayload) => {
-  if (USE_MOCK_DATA) {
-    MOCK_REVIEWS = MOCK_REVIEWS.map((review) => {
-      if (review._id !== reviewId) {
-        return review;
-      }
-      return {
-        ...review,
-        stars: updatePayload.stars,
-        comment: updatePayload.comment,
-      };
-    });
-
-    return MOCK_REVIEWS.find((review) => review._id === reviewId) ?? null;
-  }
-
-  const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+  const response = await requestJson(`/reviews/${reviewId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -382,24 +346,15 @@ export const updateReview = async (reviewId, updatePayload) => {
     body: JSON.stringify(updatePayload),
   });
 
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar la reseña');
+  if (updatePayload?.user_id) {
+    USER_REVIEWS_CACHE.delete(updatePayload.user_id);
   }
 
-  return response.json();
+  return response;
 };
 
 export const createReview = async (reviewPayload) => {
-  if (USE_MOCK_DATA) {
-    const newReview = {
-      _id: `rev-${Date.now()}`,
-      ...reviewPayload,
-    };
-    MOCK_REVIEWS = [newReview, ...MOCK_REVIEWS];
-    return newReview;
-  }
-
-  const response = await fetch(`${API_BASE_URL}/reviews`, {
+  const response = await requestJson('/reviews', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -407,129 +362,140 @@ export const createReview = async (reviewPayload) => {
     body: JSON.stringify(reviewPayload),
   });
 
-  if (!response.ok) {
-    throw new Error('No se pudo crear la reseña');
+  if (reviewPayload?.user_id) {
+    USER_REVIEWS_CACHE.delete(reviewPayload.user_id);
   }
 
-  return response.json();
+  return response;
 };
 
 export const getMenuByRestaurant = async (restaurantId) => {
-  if (USE_MOCK_DATA) {
-    return MOCK_MENU_ITEMS.filter((item) => item.restaurant_id === restaurantId).map((item) => ({ ...item }));
+  if (!restaurantId) {
+    return [];
   }
 
-  const response = await fetch(`${API_BASE_URL}/menu?restaurant_id=${restaurantId}`);
-  if (!response.ok) {
-    throw new Error('No se pudo cargar el menú del restaurante');
+  if (MENU_CACHE.has(restaurantId)) {
+    return MENU_CACHE.get(restaurantId);
   }
-  return response.json();
+
+  if (MENU_REQUESTS_IN_FLIGHT.has(restaurantId)) {
+    return MENU_REQUESTS_IN_FLIGHT.get(restaurantId);
+  }
+
+  const pendingRequest = (async () => {
+    const response = await requestJson(`/restaurants/${restaurantId}/menu`);
+    const menu = Array.isArray(response?.menu) ? response.menu : [];
+
+    const normalizedMenu = menu.map((item, index) => ({
+      _id: item.menu_id || item._id || `${restaurantId}-${index}`,
+      menu_id: item.menu_id || item._id || `${restaurantId}-${index}`,
+      Pizza: item.pizza || item.Pizza || '',
+      Type: item.type || item.Type || '',
+      Size: item.size || item.Size || '',
+      Price: Number(item.price ?? item.Price ?? 0),
+      Stock: 0,
+      restaurant_id: restaurantId,
+    }));
+
+    MENU_CACHE.set(restaurantId, normalizedMenu);
+    return normalizedMenu;
+  })();
+
+  MENU_REQUESTS_IN_FLIGHT.set(restaurantId, pendingRequest);
+
+  try {
+    return await pendingRequest;
+  } finally {
+    MENU_REQUESTS_IN_FLIGHT.delete(restaurantId);
+  }
 };
 
 export const getAdminMenuItems = async () => {
-  if (USE_MOCK_DATA) {
-    return JSON.parse(JSON.stringify(MOCK_MENU_ITEMS));
+  const restaurantNamesResponse = await requestJson('/restaurants/names');
+  const restaurantNames = Array.isArray(restaurantNamesResponse) ? restaurantNamesResponse : [];
+  const firstRestaurantId = restaurantNames[0]?.restaurant_id;
+
+  if (!firstRestaurantId) {
+    return [];
   }
 
-  const response = await fetch(`${API_BASE_URL}/admin/menu`);
-  if (!response.ok) {
-    throw new Error('No se pudieron cargar los ítems del menú para admin');
-  }
-  return response.json();
+  return getMenuByRestaurant(firstRestaurantId);
 };
 
-export const updateAdminMenuStock = async (stockUpdates) => {
-  if (USE_MOCK_DATA) {
-    MOCK_MENU_ITEMS = MOCK_MENU_ITEMS.map((item) => {
-      const foundUpdate = stockUpdates.find((updateItem) => updateItem.Menu_id === item._id);
-      if (!foundUpdate) {
-        return item;
-      }
-      return {
-        ...item,
-        Stock: Math.max(0, Number(foundUpdate.Stock) || 0),
-      };
-    });
-
-    return {
-      ok: true,
-      updated: stockUpdates.length,
-    };
-  }
-
-  const response = await fetch(`${API_BASE_URL}/admin/menu/stock`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ items: stockUpdates }),
-  });
-
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar el stock del menú');
-  }
-
-  return response.json();
+export const updateAdminMenuStock = async () => {
+  throw new Error('El backend actual no expone un endpoint para actualizar stock de menú.');
 };
 
-export const disableProductsForRestaurants = async ({ restaurantIds, menuIds }) => {
-  if (USE_MOCK_DATA) {
-    MOCK_RESTAURANTS = MOCK_RESTAURANTS.map((restaurant) => {
-      if (!restaurantIds.includes(restaurant._id)) {
-        return restaurant;
-      }
+export const disableProductsForRestaurants = async () => {
+  throw new Error('El backend actual no expone un endpoint para deshabilitar productos por restaurante.');
+};
 
-      const currentSet = new Set(restaurant.not_available_products ?? []);
-      menuIds.forEach((menuId) => currentSet.add(menuId));
+const normalizeOrderPayload = (orderPayload) => {
+  const normalizedRestaurantId = String(orderPayload?.restaurant_id ?? '').trim();
 
-      return {
-        ...restaurant,
-        not_available_products: Array.from(currentSet),
-      };
-    });
+  const normalizedItems = Array.isArray(orderPayload?.items)
+    ? orderPayload.items
+        .map((item) => ({
+          menu_id: resolveMenuIdForOrder(normalizedRestaurantId, item?.menu_id),
+          quantity: Number(item?.quantity ?? 0),
+        }))
+        .filter((item) => item.menu_id && Number.isFinite(item.quantity) && item.quantity > 0)
+    : [];
 
-    return {
-      ok: true,
-      updated_restaurants: restaurantIds.length,
-      affected_products: menuIds.length,
-    };
-  }
-
-  const response = await fetch(`${API_BASE_URL}/admin/restaurants/products/availability`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ restaurant_ids: restaurantIds, menu_ids: menuIds, enabled: false }),
-  });
-
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar la disponibilidad de productos');
-  }
-
-  return response.json();
+  return {
+    user_id: String(orderPayload?.user_id ?? '').trim(),
+    restaurant_id: normalizedRestaurantId,
+    payment_method: String(orderPayload?.payment_method ?? '').trim() || 'Credit Card',
+    items: normalizedItems,
+  };
 };
 
 export const submitOrder = async (orderPayload) => {
-  if (USE_MOCK_DATA) {
+  const normalizedOrderPayload = normalizeOrderPayload(orderPayload);
+
+  try {
+    const response = await requestJson('/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(normalizedOrderPayload),
+    });
+
     return {
-      ok: true,
-      order_id: `ord-${Date.now()}`,
-      payload: orderPayload,
+      ...(typeof response === 'object' && response !== null ? response : {}),
+      persisted_payload: normalizedOrderPayload,
+      requested_payload: normalizedOrderPayload,
+      used_fallback: false,
+    };
+  } catch (error) {
+    const hasItems = Array.isArray(normalizedOrderPayload?.items) && normalizedOrderPayload.items.length > 0;
+    const isServerError = String(error?.message || '').includes('500');
+
+    if (!hasItems || !isServerError) {
+      throw error;
+    }
+
+    const fallbackPayload = {
+      ...normalizedOrderPayload,
+      items: [],
+    };
+
+    const fallbackResponse = await requestJson('/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fallbackPayload),
+    });
+
+    return {
+      ...(typeof fallbackResponse === 'object' && fallbackResponse !== null ? fallbackResponse : {}),
+      persisted_payload: fallbackPayload,
+      requested_payload: orderPayload,
+      used_fallback: true,
+      warning:
+        'La orden fue registrada, pero el backend rechazó los items y se guardó con items vacíos.',
     };
   }
-
-  const response = await fetch(`${API_BASE_URL}/orders`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(orderPayload),
-  });
-
-  if (!response.ok) {
-    throw new Error('No se pudo enviar la orden');
-  }
-
-  return response.json();
 };

@@ -1,62 +1,137 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-const DEMO_USERS = [
-  {
-    id: 'admin-001',
-    name: 'Administrador Pizza Hut',
-    email: 'admin@pizzahut.com',
-    password: 'admin123',
-    role: 'admin',
-  },
-  {
-    id: 'user-001',
-    name: 'Cliente Pizza Hut',
-    email: 'user@pizzahut.com',
-    password: 'user123',
-    role: 'user',
-  },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const COOKIE_USER_ID = 'user_id';
+const COOKIE_USER_TYPE = 'user_type';
+const COOKIE_USER_NAME = 'user_name';
+
+const setCookie = (key, value, days = 7) => {
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+};
+
+const getCookie = (key) => {
+  const prefix = `${key}=`;
+  const found = document.cookie
+    .split(';')
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith(prefix));
+
+  if (!found) {
+    return '';
+  }
+
+  return decodeURIComponent(found.substring(prefix.length));
+};
+
+const clearCookie = (key) => {
+  document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+};
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState('');
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  const login = (email, password) => {
-    const foundUser = DEMO_USERS.find(
-      (user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password,
-    );
+  useEffect(() => {
+    const storedUserId = getCookie(COOKIE_USER_ID);
+    if (storedUserId) {
+      setCurrentUser({
+        id: storedUserId,
+        role: getCookie(COOKIE_USER_TYPE) || 'user',
+        name: getCookie(COOKIE_USER_NAME) || 'Usuario',
+      });
+    }
+    setIsInitializing(false);
+  }, []);
 
-    if (!foundUser) {
+  const login = async (email, password) => {
+    setError('');
+    try {
+      const loginUrl = `${API_BASE_URL}/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+      const response = await fetch(loginUrl, {
+        method: 'GET',
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
+      if (!response.ok) {
+        setCurrentUser(null);
+        clearCookie(COOKIE_USER_ID);
+        clearCookie(COOKIE_USER_TYPE);
+        clearCookie(COOKIE_USER_NAME);
+        setError(payload?.detail || payload?.message || 'Credenciales inválidas.');
+        return false;
+      }
+
+      if (Array.isArray(payload) && payload.length > 1 && Number(payload[1]) >= 400) {
+        setCurrentUser(null);
+        clearCookie(COOKIE_USER_ID);
+        clearCookie(COOKIE_USER_TYPE);
+        clearCookie(COOKIE_USER_NAME);
+        setError(payload[0]?.message || 'Credenciales inválidas.');
+        return false;
+      }
+
+      const userId = payload?.User_id || payload?.user_id || payload?._id;
+      const backendType = payload?.user_type || payload?.role || 'Consumer';
+      const userName = payload?.user_name || payload?.name || 'Usuario';
+      const mappedRole = String(backendType).toLowerCase() === 'admin' ? 'admin' : 'user';
+
+      if (!userId) {
+        setCurrentUser(null);
+        clearCookie(COOKIE_USER_ID);
+        clearCookie(COOKIE_USER_TYPE);
+        clearCookie(COOKIE_USER_NAME);
+        setError('Credenciales inválidas.');
+        return false;
+      }
+
+      setCookie(COOKIE_USER_ID, userId);
+      setCookie(COOKIE_USER_TYPE, mappedRole);
+      setCookie(COOKIE_USER_NAME, userName);
+
+      setCurrentUser({
+        id: userId,
+        name: userName,
+        role: mappedRole,
+      });
+
+      return true;
+    } catch {
       setCurrentUser(null);
-      setError('Credenciales inválidas. Intenta con los usuarios de prueba.');
+      clearCookie(COOKIE_USER_ID);
+      clearCookie(COOKIE_USER_TYPE);
+      clearCookie(COOKIE_USER_NAME);
+      setError('No se pudo conectar con el backend.');
       return false;
     }
-
-    setCurrentUser({
-      id: foundUser.id,
-      name: foundUser.name,
-      email: foundUser.email,
-      role: foundUser.role,
-    });
-    setError('');
-    return true;
   };
 
   const logout = () => {
     setCurrentUser(null);
     setError('');
+    clearCookie(COOKIE_USER_ID);
+    clearCookie(COOKIE_USER_TYPE);
+    clearCookie(COOKIE_USER_NAME);
   };
 
   const value = useMemo(
     () => ({
       currentUser,
       error,
+      isInitializing,
       login,
       logout,
     }),
-    [currentUser, error],
+    [currentUser, error, isInitializing],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

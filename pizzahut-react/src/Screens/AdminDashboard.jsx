@@ -27,16 +27,21 @@ export default function AdminDashboard({ user, onLogout }) {
 
   useEffect(() => {
     const loadData = async () => {
-      const [adminMenuItems, allLocations] = await Promise.all([getAdminMenuItems(), getAllLocations()]);
+      try {
+        const [adminMenuItems, allLocations] = await Promise.all([getAdminMenuItems(), getAllLocations()]);
 
-      setMenuItems(adminMenuItems);
-      setLocations(allLocations);
-      setStockByMenuId(
-        adminMenuItems.reduce((acc, item) => {
-          acc[item._id] = item.Stock ?? 0;
-          return acc;
-        }, {}),
-      );
+        setMenuItems(adminMenuItems);
+        setLocations(allLocations);
+        setStockByMenuId(
+          adminMenuItems.reduce((acc, item) => {
+            acc[item._id] = item.Stock ?? 0;
+            return acc;
+          }, {}),
+        );
+      } catch (loadError) {
+        console.error(loadError);
+        setAdminMessage(loadError.message || 'No se pudieron cargar los datos de administrador.');
+      }
     };
 
     loadData();
@@ -58,11 +63,14 @@ export default function AdminDashboard({ user, onLogout }) {
       Stock: stockByMenuId[item._id] ?? 0,
     }));
 
-    await updateAdminMenuStock(stockUpdates);
-    const refreshedMenu = await getAdminMenuItems();
-    setMenuItems(refreshedMenu);
-
-    setAdminMessage('Cambios de inventario guardados correctamente.');
+    try {
+      await updateAdminMenuStock(stockUpdates);
+      const refreshedMenu = await getAdminMenuItems();
+      setMenuItems(refreshedMenu);
+      setAdminMessage('Cambios de inventario guardados correctamente.');
+    } catch (saveError) {
+      setAdminMessage(saveError.message || 'No se pudo guardar el inventario.');
+    }
   };
 
   const toggleSelection = (setFn, currentList, value) => {
@@ -78,16 +86,20 @@ export default function AdminDashboard({ user, onLogout }) {
       return;
     }
 
-    await disableProductsForRestaurants({
-      restaurantIds: selectedRestaurantIds,
-      menuIds: selectedMenuIds,
-    });
+    try {
+      await disableProductsForRestaurants({
+        restaurantIds: selectedRestaurantIds,
+        menuIds: selectedMenuIds,
+      });
 
-    const refreshedLocations = await getAllLocations();
-    setLocations(refreshedLocations);
-    setSelectedRestaurantIds([]);
-    setSelectedMenuIds([]);
-    setAdminMessage('Productos deshabilitados en los restaurantes seleccionados.');
+      const refreshedLocations = await getAllLocations();
+      setLocations(refreshedLocations);
+      setSelectedRestaurantIds([]);
+      setSelectedMenuIds([]);
+      setAdminMessage('Productos deshabilitados en los restaurantes seleccionados.');
+    } catch (disableError) {
+      setAdminMessage(disableError.message || 'No se pudo actualizar la disponibilidad.');
+    }
   };
 
   const menuById = useMemo(() => {

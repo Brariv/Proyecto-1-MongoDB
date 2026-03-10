@@ -9,6 +9,8 @@ import {
   submitOrder,
   getUserProfile,
   updateUserProfile,
+  createUserAddress,
+  deleteUserAddress,
   updateReview,
   getUserReviews,
 } from '../services/dashboardService';
@@ -23,7 +25,9 @@ const DASHBOARD_SECTIONS = {
 
 export default function UserDashboard({ user, onLogout }) {
   const [activeSection, setActiveSection] = useState(DASHBOARD_SECTIONS.order);
+  const [toast, setToast] = useState(null);
   const [profileEditMode, setProfileEditMode] = useState(false);
+  const [showAddAddressForm, setShowAddAddressForm] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileForm, setProfileForm] = useState({
     name: '',
@@ -37,8 +41,8 @@ export default function UserDashboard({ user, onLogout }) {
     alias: '',
     address: '',
     city: '',
-    latitude: '',
-    longitude: '',
+    state: '',
+    postal_code: '',
   });
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [recommendedLocations, setRecommendedLocations] = useState([]);
@@ -48,6 +52,9 @@ export default function UserDashboard({ user, onLogout }) {
   const [menuItems, setMenuItems] = useState([]);
   const [quantitiesByMenuId, setQuantitiesByMenuId] = useState({});
   const [lastOrderPayload, setLastOrderPayload] = useState(null);
+  const [lastRequestedOrderPayload, setLastRequestedOrderPayload] = useState(null);
+  const [orderError, setOrderError] = useState('');
+  const [orderWarning, setOrderWarning] = useState('');
   const [addressSearch, setAddressSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Credit Card');
   const [reviewModalType, setReviewModalType] = useState(null);
@@ -60,30 +67,46 @@ export default function UserDashboard({ user, onLogout }) {
   });
 
   useEffect(() => {
+    if (!toast?.id) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setToast(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timer);
+  }, [toast?.id]);
+
+  useEffect(() => {
     const loadData = async () => {
-      const userProfile = await getUserProfile(user.id);
-      const allLocations = await getAllLocations();
-      const userReviews = await getUserReviews(user.id);
-      const allowedRestaurants = await getReviewableRestaurants(user.id);
+      try {
+        const userProfile = await getUserProfile(user.id, { noCache: true, cacheBust: true });
+        const allLocations = await getAllLocations();
+        const userReviews = await getUserReviews(user.id);
+        const allowedRestaurants = await getReviewableRestaurants(user.id);
 
-      setProfile(userProfile);
-      setProfileForm({
-        name: userProfile?.name ?? '',
-        email: userProfile?.email ?? '',
-        password: userProfile?.password ?? 'hashed_password',
-        phone: userProfile?.phone ?? '',
-        addresses: userProfile?.addresses ?? [],
-        reviews_id: userProfile?.reviews_id ?? [],
-      });
-      setLocations(allLocations);
-      setReviews(userReviews);
-      setReviewableRestaurants(allowedRestaurants);
+        setProfile(userProfile);
+        setProfileForm({
+          name: userProfile?.name ?? '',
+          email: userProfile?.email ?? '',
+          password: userProfile?.password ?? 'hashed_password',
+          phone: userProfile?.phone ?? '',
+          addresses: userProfile?.addresses ?? [],
+          reviews_id: userProfile?.reviews_id ?? [],
+        });
+        setLocations(allLocations);
+        setReviews(userReviews);
+        setReviewableRestaurants(allowedRestaurants);
 
-      if (userProfile?.addresses?.length) {
-        const firstAddress = userProfile.addresses[0];
-        setSelectedAddressId(firstAddress.id);
-        const nearest = await getNearbyLocationsByAddress(firstAddress);
-        setRecommendedLocations(nearest);
+        if (userProfile?.addresses?.length) {
+          const firstAddress = userProfile.addresses[0];
+          setSelectedAddressId(firstAddress.id);
+          const nearest = await getNearbyLocationsByAddress(firstAddress);
+          setRecommendedLocations(nearest);
+        }
+      } catch (loadError) {
+        console.error(loadError);
       }
     };
 
@@ -91,12 +114,16 @@ export default function UserDashboard({ user, onLogout }) {
   }, [user.id]);
 
   const refreshReviewsData = async () => {
-    const [userReviews, allowedRestaurants] = await Promise.all([
-      getUserReviews(user.id),
-      getReviewableRestaurants(user.id),
-    ]);
-    setReviews(userReviews);
-    setReviewableRestaurants(allowedRestaurants);
+    try {
+      const [userReviews, allowedRestaurants] = await Promise.all([
+        getUserReviews(user.id),
+        getReviewableRestaurants(user.id),
+      ]);
+      setReviews(userReviews);
+      setReviewableRestaurants(allowedRestaurants);
+    } catch (refreshError) {
+      console.error(refreshError);
+    }
   };
 
   const syncProfileForm = (nextProfile) => {
@@ -138,6 +165,9 @@ export default function UserDashboard({ user, onLogout }) {
     setMenuItems(items);
     setQuantitiesByMenuId({});
     setLastOrderPayload(null);
+    setLastRequestedOrderPayload(null);
+    setOrderError('');
+    setOrderWarning('');
     setActiveSection(DASHBOARD_SECTIONS.menu);
   };
 
@@ -216,6 +246,8 @@ export default function UserDashboard({ user, onLogout }) {
       await updateReview(selectedReview._id, {
         stars: Number(reviewForm.stars),
         comment: reviewForm.comment,
+        user_id: user.id,
+        restaurant_id: reviewForm.restaurant_id,
       });
     }
 
@@ -233,39 +265,91 @@ export default function UserDashboard({ user, onLogout }) {
     closeReviewModal();
   };
 
-  const handleAddAddress = () => {
+  const refreshProfile = async (nextSelectedAddressId = null) => {
+    const updated = await getUserProfile(user.id, { noCache: true, cacheBust: true });
+    if (updated) {
+      syncProfileForm(updated);
+
+      const nextAddresses = updated.addresses || [];
+      const currentSelected = nextSelectedAddressId ?? selectedAddressId;
+      const stillExists = nextAddresses.some((address) => address.id === currentSelected);
+      const fallbackId = nextAddresses[0]?.id || '';
+      const effectiveSelectedId = stillExists ? currentSelected : fallbackId;
+      setSelectedAddressId(effectiveSelectedId);
+
+      const selected = nextAddresses.find((address) => address.id === effectiveSelectedId) || null;
+      if (selected) {
+        const nearest = await getNearbyLocationsByAddress(selected);
+        setRecommendedLocations(nearest);
+      } else {
+        setRecommendedLocations([]);
+      }
+    }
+  };
+
+  const handleAddAddress = async () => {
     if (!newAddressForm.alias || !newAddressForm.address || !newAddressForm.city) {
+      setToast({
+        id: Date.now(),
+        type: 'error',
+        message: 'Completa alias, dirección y ciudad.',
+      });
       return;
     }
 
-    const addressToAdd = {
-      id: `addr-${Date.now()}`,
-      alias: newAddressForm.alias,
-      address: newAddressForm.address,
-      city: newAddressForm.city,
-      latitude: Number(newAddressForm.latitude) || 0,
-      longitude: Number(newAddressForm.longitude) || 0,
-    };
+    try {
+      await createUserAddress(user.id, {
+        alias: newAddressForm.alias,
+        address: newAddressForm.address,
+        city: newAddressForm.city,
+        state: newAddressForm.state,
+        postal_code: newAddressForm.postal_code,
+      });
 
-    setProfileForm((prev) => ({
-      ...prev,
-      addresses: [...prev.addresses, addressToAdd],
-    }));
+      setNewAddressForm({
+        alias: '',
+        address: '',
+        city: '',
+        state: '',
+        postal_code: '',
+      });
 
-    setNewAddressForm({
-      alias: '',
-      address: '',
-      city: '',
-      latitude: '',
-      longitude: '',
-    });
+      setToast({
+        id: Date.now(),
+        type: 'success',
+        message: 'Dirección agregada correctamente.',
+      });
+
+      await refreshProfile();
+    } catch (error) {
+      setToast({
+        id: Date.now(),
+        type: 'error',
+        message: error?.message || 'No se pudo agregar la dirección.',
+      });
+    }
   };
 
-  const handleRemoveAddress = (addressId) => {
-    setProfileForm((prev) => ({
-      ...prev,
-      addresses: prev.addresses.filter((address) => address.id !== addressId),
-    }));
+  const handleRemoveAddress = async (addressToRemove) => {
+    if (!addressToRemove?.address) {
+      return;
+    }
+
+    try {
+      await deleteUserAddress(user.id, addressToRemove.address);
+      setToast({
+        id: Date.now(),
+        type: 'success',
+        message: 'Dirección eliminada correctamente.',
+      });
+      await refreshProfile();
+    } catch (error) {
+      setToast({
+        id: Date.now(),
+        type: 'error',
+        message: error?.message || 'No se pudo eliminar la dirección.',
+      });
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -273,7 +357,6 @@ export default function UserDashboard({ user, onLogout }) {
       name: profileForm.name,
       email: profileForm.email,
       phone: profileForm.phone,
-      addresses: profileForm.addresses,
       reviews_id: profileForm.reviews_id,
     };
 
@@ -295,26 +378,38 @@ export default function UserDashboard({ user, onLogout }) {
       return;
     }
 
-    const items = menuItems
+    setOrderError('');
+    setOrderWarning('');
+
+    const selectedItems = menuItems
       .filter((item) => (quantitiesByMenuId[item._id] ?? 0) > 0)
       .map((item) => ({
-        Menu_id: item._id,
-        Quantity: quantitiesByMenuId[item._id],
-        Price: item.Price,
+        menu_id: item.menu_id,
+        quantity: quantitiesByMenuId[item._id],
       }));
 
     const orderPayload = {
-      _id: `ord-${Date.now()}`,
-      User_id: user.id,
-      Restaurant_id: selectedRestaurant._id,
-      Total: Number(subtotal.toFixed(2)),
-      Items: items,
-      Order_date: new Date().toISOString(),
-      Payment_method: paymentMethod,
+      user_id: user.id,
+      restaurant_id: selectedRestaurant._id,
+      payment_method: paymentMethod,
+      items: selectedItems,
     };
 
-    const response = await submitOrder(orderPayload);
-    setLastOrderPayload(response.payload ?? orderPayload);
+    try {
+      const response = await submitOrder(orderPayload);
+      setLastOrderPayload(response.persisted_payload ?? orderPayload);
+      setLastRequestedOrderPayload(response.requested_payload ?? orderPayload);
+      setOrderError('');
+      setOrderWarning(response?.warning || '');
+      setToast({
+        id: Date.now(),
+        type: 'success',
+        message: 'Orden enviada correctamente.',
+      });
+    } catch (error) {
+      setOrderError(error?.message || 'No se pudo enviar la orden.');
+      setOrderWarning('');
+    }
   };
 
   const renderOrderSection = () => (
@@ -447,12 +542,8 @@ export default function UserDashboard({ user, onLogout }) {
         </div>
       </div>
 
-      {lastOrderPayload ? (
-        <div className="order-json-box">
-          <p>JSON enviado:</p>
-          <pre>{JSON.stringify(lastOrderPayload, null, 2)}</pre>
-        </div>
-      ) : null}
+      {orderError ? <p className="selected-address">{orderError}</p> : null}
+      {orderWarning ? <p className="selected-address">{orderWarning}</p> : null}
     </section>
   );
 
@@ -698,30 +789,41 @@ export default function UserDashboard({ user, onLogout }) {
       </div>
 
       <div className="profile-addresses-block">
-        <h3>Direcciones</h3>
+        <div className="profile-screen-header">
+          <h3>Direcciones</h3>
+          <button
+            type="button"
+            className="new-review-button"
+            onClick={() => setShowAddAddressForm((prev) => !prev)}
+          >
+            <Plus size={16} /> Añadir dirección
+          </button>
+        </div>
         <div className="cards-grid">
           {(profileForm.addresses || []).map((address) => (
             <article key={address.id} className="dashboard-card profile-address-card">
               <p><strong>{address.alias}</strong></p>
               <p>{address.address}</p>
-              <p>{address.city}</p>
-              <p>Lat: {address.latitude}</p>
-              <p>Lng: {address.longitude}</p>
-              {profileEditMode ? (
-                <button
-                  type="button"
-                  className="edit-review-button delete-address-button"
-                  onClick={() => handleRemoveAddress(address.id)}
-                >
-                  <Trash2 size={14} /> Eliminar
-                </button>
-              ) : null}
+              <p>
+                {address.city}
+                {address.state ? `, ${address.state}` : ''}
+                {address.postal_code ? ` (${address.postal_code})` : ''}
+              </p>
+              <p>Lat: {Number(address.latitude || 0).toFixed(6)}</p>
+              <p>Lng: {Number(address.longitude || 0).toFixed(6)}</p>
+              <button
+                type="button"
+                className="edit-review-button delete-address-button"
+                onClick={() => handleRemoveAddress(address)}
+              >
+                <Trash2 size={14} /> Eliminar
+              </button>
             </article>
           ))}
         </div>
       </div>
 
-      {profileEditMode ? (
+      {showAddAddressForm ? (
         <div className="add-address-box">
           <h3>Añadir nueva dirección</h3>
           <div className="profile-data-grid">
@@ -747,24 +849,31 @@ export default function UserDashboard({ user, onLogout }) {
               />
             </label>
             <label>
-              Latitud
+              Estado
               <input
-                value={newAddressForm.latitude}
-                onChange={(event) => setNewAddressForm((prev) => ({ ...prev, latitude: event.target.value }))}
+                value={newAddressForm.state}
+                onChange={(event) => setNewAddressForm((prev) => ({ ...prev, state: event.target.value }))}
               />
             </label>
             <label>
-              Longitud
+              Código postal
               <input
-                value={newAddressForm.longitude}
-                onChange={(event) => setNewAddressForm((prev) => ({ ...prev, longitude: event.target.value }))}
+                value={newAddressForm.postal_code}
+                onChange={(event) =>
+                  setNewAddressForm((prev) => ({ ...prev, postal_code: event.target.value }))
+                }
               />
             </label>
           </div>
 
-          <button type="button" className="new-review-button" onClick={handleAddAddress}>
-            <Plus size={16} /> Añadir dirección
-          </button>
+          <div className="profile-actions">
+            <button type="button" className="back-button" onClick={() => setShowAddAddressForm(false)}>
+              Cancelar
+            </button>
+            <button type="button" className="new-review-button" onClick={handleAddAddress}>
+              <Plus size={16} /> Guardar dirección
+            </button>
+          </div>
         </div>
       ) : null}
     </section>
@@ -843,6 +952,15 @@ export default function UserDashboard({ user, onLogout }) {
 
         {renderContent()}
       </section>
+
+      {toast ? (
+        <div className={`toast toast-${toast.type ?? 'success'}`} role="status" aria-live="polite">
+          <span className="toast-message">{toast.message}</span>
+          <button type="button" className="toast-close" onClick={() => setToast(null)} aria-label="Cerrar">
+            <X size={16} />
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }

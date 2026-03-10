@@ -471,6 +471,38 @@ body {
   color: #3d3d3d;
 }
 
+.toast {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: min(360px, calc(100vw - 2.2rem));
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid #ffd7d3;
+  background: #fff5f4;
+  color: #8f1616;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+}
+
+.toast-message {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.toast-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
 .locations-search-box {
   display: flex;
   align-items: center;
