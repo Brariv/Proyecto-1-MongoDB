@@ -465,12 +465,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}//restaurants/near",
+              "raw": "{{baseUrl}}/restaurants/near",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "",
                 "restaurants",
                 "near"
               ]
@@ -626,6 +625,84 @@
               "cookie": [],
               "responseTime": "2026-03-09T17:07:52.791Z",
               "body": "[\n    {\n        \"message\": \"Menu item created successfully\"\n    },\n    201\n]"
+            }
+          ]
+        },
+        {
+          "name": "New Request",
+          "id": "287c0464-d22d-406c-83a7-0c4654a12cfe",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"items_ids\": [\n        \"69ac7ea0d98fe243f22a6bb9\", \"69ac7ea0d98fe243f22a6bba\"\n    ],\n    \"restaurants_ids\":[\n        \"69ac7ea0d98fe243f22a69c3\", \"69ac7ea0d98fe243f22a69d0\"\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/unavailable-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "unavailable-items"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "3e895e33-4131-418a-9f5b-9d0da9c18100",
+              "name": "New Request",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"items_ids\": [\n        \"69ac7ea0d98fe243f22a6bb9\", \"69ac7ea0d98fe243f22a6bba\"\n    ],\n    \"restaurants_ids\":[\n        \"69ac7ea0d98fe243f22a69c3\", \"69ac7ea0d98fe243f22a69d0\"\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/unavailable-items",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "unavailable-items"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 01:05:51 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "39"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T01:05:56.455Z",
+              "body": "{\n    \"message\": \"Menu updated successfully\"\n}"
             }
           ]
         }
@@ -1017,6 +1094,252 @@
         }
       ],
       "id": "49573298-410c-4fd8-9568-e6be73738f73"
+    },
+    {
+      "name": "Aggregations",
+      "item": [
+        {
+          "name": "Best rated restaurants",
+          "id": "c89b7e7d-8f06-40a0-9e7d-dfc7e0331cd3",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/best-rated",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "best-rated"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "a947992a-1a21-434e-8f3b-51c64938ca1d",
+              "name": "New Request",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/best-rated",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "best-rated"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 00:39:27 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "572"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T00:43:58.006Z",
+              "body": "[\n    {\n        \"totalReviews\": 3,\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6af3\",\n        \"name\": \"Pizza Hut\",\n        \"city\": \"Phoenix\",\n        \"avgStars\": 5\n    },\n    {\n        \"totalReviews\": 1,\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6a62\",\n        \"name\": \"Pizza Hut\",\n        \"city\": \"De Queen\",\n        \"avgStars\": 5\n    },\n    {\n        \"totalReviews\": 1,\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6aa1\",\n        \"name\": \"Pizza Hut\",\n        \"city\": \"Texarkana\",\n        \"avgStars\": 5\n    },\n    {\n        \"totalReviews\": 3,\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a6ac0\",\n        \"name\": \"Pizza Hut\",\n        \"city\": \"Douglas\",\n        \"avgStars\": 5\n    },\n    {\n        \"totalReviews\": 2,\n        \"restaurant_id\": \"69ac7ea0d98fe243f22a69fc\",\n        \"name\": \"Pizza Hut\",\n        \"city\": \"Haleyville\",\n        \"avgStars\": 5\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Sales per State",
+          "id": "8c1a2c0c-cc4b-4d23-99e8-243c7504556e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-per-state",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-per-state"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "6c8f500f-4ef1-43c8-9501-0b7386ef370d",
+              "name": "New Request",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-per-state",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-per-state"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 00:44:38 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "284"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T00:45:15.466Z",
+              "body": "[\n    {\n        \"total_sales\": 61676.11,\n        \"total_orders\": 771,\n        \"state\": \"AZ\"\n    },\n    {\n        \"total_sales\": 49458.79,\n        \"total_orders\": 599,\n        \"state\": \"AL\"\n    },\n    {\n        \"total_sales\": 48218.47,\n        \"total_orders\": 588,\n        \"state\": \"CA\"\n    },\n    {\n        \"total_sales\": 39523.72,\n        \"total_orders\": 492,\n        \"state\": \"AR\"\n    },\n    {\n        \"total_sales\": 4527.11,\n        \"total_orders\": 54,\n        \"state\": \"AK\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Best Seller",
+          "id": "8a4ef583-aaa0-410b-b221-abaf67e37ac1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/best-sellers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "best-sellers"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f650fc36-c197-4547-b15f-85afa0c015cb",
+              "name": "Best Seller",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/best-sellers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "best-sellers"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 00:53:08 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "19791"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T00:53:23.766Z",
+              "body": "[\n    {\n        \"totalQuantitySold\": 170,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6beb\",\n        \"productName\": \"Supreme Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 164,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c30\",\n        \"productName\": \"Skinny With A Kick™ (Skinny Slice)\",\n        \"type\": \"Skinny Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 151,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c03\",\n        \"productName\": \"New Primo Meat Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 149,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c34\",\n        \"productName\": \"Create Your Own (Gluten-Free Crust)\",\n        \"type\": \"Gluten-Free Pizzas\",\n        \"size\": \"Small\"\n    },\n    {\n        \"totalQuantitySold\": 149,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd7\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 146,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf5\",\n        \"productName\": \"BBQ Lover's™ (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 145,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bb9\",\n        \"productName\": \"Pan Pizza\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 143,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc9\",\n        \"productName\": \"Meat Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 143,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c22\",\n        \"productName\": \"Hot and Twisted™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 142,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bde\",\n        \"productName\": \"Veggie Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 141,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bdb\",\n        \"productName\": \"Veggie Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 140,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2e\",\n        \"productName\": \"7-Alarm Fire™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 140,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c01\",\n        \"productName\": \"New Primo Meat Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 140,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2a\",\n        \"productName\": \"Buffalo State of Mind™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 139,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bca\",\n        \"productName\": \"Meat Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 138,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be3\",\n        \"productName\": \"Veggie Lover's® Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 137,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be4\",\n        \"productName\": \"Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 137,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf7\",\n        \"productName\": \"Chicken Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 135,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bed\",\n        \"productName\": \"BBQ Lover's™ (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 135,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1f\",\n        \"productName\": \"Cock-a-doodle Bacon™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 135,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc7\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 134,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bea\",\n        \"productName\": \"Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 133,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1d\",\n        \"productName\": \"Old Fashioned Meatbrawl™ (Pan Pizza)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 133,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bcc\",\n        \"productName\": \"Meat Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 133,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0a\",\n        \"productName\": \"Hawaiian Luau (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 133,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf4\",\n        \"productName\": \"BBQ Lover's™ (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 133,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c13\",\n        \"productName\": \"Super Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 132,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bfb\",\n        \"productName\": \"Chicken Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 132,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc3\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 132,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c27\",\n        \"productName\": \"Giddy-Up BBQ Chicken™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 131,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bcd\",\n        \"productName\": \"Meat Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 131,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c32\",\n        \"productName\": \"Skinny Luau™ (Skinny Slice)\",\n        \"type\": \"Skinny Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 130,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0c\",\n        \"productName\": \"Hawaiian Luau (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 130,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf2\",\n        \"productName\": \"BBQ Lover's™ (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 130,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd0\",\n        \"productName\": \"Meat Lover's® Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 130,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bdd\",\n        \"productName\": \"Veggie Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 129,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c07\",\n        \"productName\": \"New Primo Meat Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 129,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bbc\",\n        \"productName\": \"Thin N Crispy\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 128,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c28\",\n        \"productName\": \"Giddy-Up BBQ Chicken™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 128,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1c\",\n        \"productName\": \"Old Fashioned Meatbrawl™ (Pan Pizza)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 128,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc1\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 126,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c20\",\n        \"productName\": \"Cock-a-doodle Bacon™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 126,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be0\",\n        \"productName\": \"Veggie Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc6\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd9\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2b\",\n        \"productName\": \"Cherry Pepper Bombshell™ (Thin N Crispy)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c00\",\n        \"productName\": \"New Primo Meat Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf8\",\n        \"productName\": \"Chicken Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc8\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 125,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf1\",\n        \"productName\": \"BBQ Lover's™ (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 124,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2f\",\n        \"productName\": \"Skinny Beach™ (Skinny Slice)\",\n        \"type\": \"Skinny Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0f\",\n        \"productName\": \"Hawaiian Luau (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c21\",\n        \"productName\": \"Hot and Twisted™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be2\",\n        \"productName\": \"Veggie Lover's® Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc5\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc2\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c11\",\n        \"productName\": \"Super Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc0\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 123,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be5\",\n        \"productName\": \"Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 122,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bbe\",\n        \"productName\": \"Stuffed Crust\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 122,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf6\",\n        \"productName\": \"Chicken Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 122,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bdc\",\n        \"productName\": \"Veggie Lover's® Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 122,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be7\",\n        \"productName\": \"Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 121,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c31\",\n        \"productName\": \"Skinny Italy (Skinny Slice)\",\n        \"type\": \"Skinny Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 121,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c02\",\n        \"productName\": \"New Primo Meat Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 120,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0d\",\n        \"productName\": \"Hawaiian Luau (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 120,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1b\",\n        \"productName\": \"Garden Party™ (Thin N Crispy)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 119,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c10\",\n        \"productName\": \"Hawaiian Luau (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 118,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0e\",\n        \"productName\": \"Hawaiian Luau (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 118,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bcb\",\n        \"productName\": \"Meat Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 117,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd3\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 117,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be1\",\n        \"productName\": \"Veggie Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 117,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c04\",\n        \"productName\": \"New Primo Meat Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bbf\",\n        \"productName\": \"Skinny Slice\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c26\",\n        \"productName\": \"BBQ Bacon Cheeseburger (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bda\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bdf\",\n        \"productName\": \"Veggie Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1e\",\n        \"productName\": \"Old Fashioned Meatbrawl™ (Pan Pizza)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c12\",\n        \"productName\": \"Super Supreme Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bba\",\n        \"productName\": \"Pan Pizza\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd6\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 116,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2c\",\n        \"productName\": \"Cherry Pepper Bombshell™ (Thin N Crispy)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd2\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c09\",\n        \"productName\": \"Hawaiian Luau (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bff\",\n        \"productName\": \"New Primo Meat Pizza (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bfe\",\n        \"productName\": \"Chicken Supreme Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c15\",\n        \"productName\": \"Super Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 115,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c05\",\n        \"productName\": \"New Primo Meat Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 114,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bee\",\n        \"productName\": \"BBQ Lover's™ (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 113,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c23\",\n        \"productName\": \"Pretzel Piggy™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 113,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bbb\",\n        \"productName\": \"Pan Pizza\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 112,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bb8\",\n        \"productName\": \"Hand-Tossed\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 112,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c1a\",\n        \"productName\": \"Garden Party™ (Thin N Crispy)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 111,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bfa\",\n        \"productName\": \"Chicken Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 110,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bfd\",\n        \"productName\": \"Chicken Supreme Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 110,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be6\",\n        \"productName\": \"Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 109,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c0b\",\n        \"productName\": \"Hawaiian Luau (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 109,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c16\",\n        \"productName\": \"Super Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 108,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c17\",\n        \"productName\": \"Super Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 107,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c08\",\n        \"productName\": \"Hawaiian Luau (Hand-Tossed)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 106,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bbd\",\n        \"productName\": \"Thin N Crispy\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 106,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c33\",\n        \"productName\": \"Skinny Club™ (Skinny Slice)\",\n        \"type\": \"Skinny Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 105,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c2d\",\n        \"productName\": \"7-Alarm Fire™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 105,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd1\",\n        \"productName\": \"Meat Lover's® Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 105,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c29\",\n        \"productName\": \"Buffalo State of Mind™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 104,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c18\",\n        \"productName\": \"Super Supreme Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 104,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd5\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 104,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c24\",\n        \"productName\": \"Pretzel Piggy™ (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 103,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd4\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    },\n    {\n        \"totalQuantitySold\": 103,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c14\",\n        \"productName\": \"Super Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 102,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be8\",\n        \"productName\": \"Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 101,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c06\",\n        \"productName\": \"New Primo Meat Pizza (Stuffed Crust)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 100,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bfc\",\n        \"productName\": \"Chicken Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 98,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf9\",\n        \"productName\": \"Chicken Supreme Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 98,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6be9\",\n        \"productName\": \"Supreme Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 97,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bce\",\n        \"productName\": \"Meat Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 96,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c19\",\n        \"productName\": \"Super Supreme Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 96,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bd8\",\n        \"productName\": \"Ultimate Cheese Lover's Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 95,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6c25\",\n        \"productName\": \"BBQ Bacon Cheeseburger (Hand-Tossed)\",\n        \"type\": \"New Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 94,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bec\",\n        \"productName\": \"Supreme Pizza (Skinny Slice)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 91,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bb7\",\n        \"productName\": \"Hand-Tossed\",\n        \"type\": \"Cheese Pizza\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 91,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bc4\",\n        \"productName\": \"Pepperoni Lover's® Pizza (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 91,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf0\",\n        \"productName\": \"BBQ Lover's™ (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Medium\"\n    },\n    {\n        \"totalQuantitySold\": 88,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bcf\",\n        \"productName\": \"Meat Lover's® Pizza (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 87,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bf3\",\n        \"productName\": \"BBQ Lover's™ (Thin N Crispy)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Large\"\n    },\n    {\n        \"totalQuantitySold\": 85,\n        \"menu_id\": \"69ac7ea0d98fe243f22a6bef\",\n        \"productName\": \"BBQ Lover's™ (Pan Pizza)\",\n        \"type\": \"Classic Recipe Pizzas\",\n        \"size\": \"Personal\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Sales Trend",
+          "id": "a7864964-c81e-4b07-ab26-3bc55718335e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-per-month",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-per-month"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "042b7ada-acde-432d-9cf2-fb3b5ca66e65",
+              "name": "Sales Trend",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-per-month",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-per-month"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Tue, 10 Mar 2026 01:01:37 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "1698"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": "2026-03-10T01:01:44.439Z",
+              "body": "[\n    {\n        \"totalSales\": 7898.45,\n        \"totalOrders\": 96,\n        \"year\": 2024,\n        \"month\": 1\n    },\n    {\n        \"totalSales\": 7008.9800000000005,\n        \"totalOrders\": 83,\n        \"year\": 2024,\n        \"month\": 2\n    },\n    {\n        \"totalSales\": 7996.26,\n        \"totalOrders\": 101,\n        \"year\": 2024,\n        \"month\": 3\n    },\n    {\n        \"totalSales\": 8212.44,\n        \"totalOrders\": 97,\n        \"year\": 2024,\n        \"month\": 4\n    },\n    {\n        \"totalSales\": 6833.31,\n        \"totalOrders\": 94,\n        \"year\": 2024,\n        \"month\": 5\n    },\n    {\n        \"totalSales\": 7374.96,\n        \"totalOrders\": 96,\n        \"year\": 2024,\n        \"month\": 6\n    },\n    {\n        \"totalSales\": 8665.6,\n        \"totalOrders\": 99,\n        \"year\": 2024,\n        \"month\": 7\n    },\n    {\n        \"totalSales\": 8803.87,\n        \"totalOrders\": 113,\n        \"year\": 2024,\n        \"month\": 8\n    },\n    {\n        \"totalSales\": 7187.88,\n        \"totalOrders\": 87,\n        \"year\": 2024,\n        \"month\": 9\n    },\n    {\n        \"totalSales\": 6478.94,\n        \"totalOrders\": 89,\n        \"year\": 2024,\n        \"month\": 10\n    },\n    {\n        \"totalSales\": 9086.66,\n        \"totalOrders\": 109,\n        \"year\": 2024,\n        \"month\": 11\n    },\n    {\n        \"totalSales\": 7985.3,\n        \"totalOrders\": 92,\n        \"year\": 2024,\n        \"month\": 12\n    },\n    {\n        \"totalSales\": 6360.98,\n        \"totalOrders\": 78,\n        \"year\": 2025,\n        \"month\": 1\n    },\n    {\n        \"totalSales\": 8155.46,\n        \"totalOrders\": 96,\n        \"year\": 2025,\n        \"month\": 2\n    },\n    {\n        \"totalSales\": 6839.65,\n        \"totalOrders\": 85,\n        \"year\": 2025,\n        \"month\": 3\n    },\n    {\n        \"totalSales\": 7535.52,\n        \"totalOrders\": 99,\n        \"year\": 2025,\n        \"month\": 4\n    },\n    {\n        \"totalSales\": 7538.37,\n        \"totalOrders\": 91,\n        \"year\": 2025,\n        \"month\": 5\n    },\n    {\n        \"totalSales\": 8187.27,\n        \"totalOrders\": 102,\n        \"year\": 2025,\n        \"month\": 6\n    },\n    {\n        \"totalSales\": 7845.31,\n        \"totalOrders\": 103,\n        \"year\": 2025,\n        \"month\": 7\n    },\n    {\n        \"totalSales\": 6782.06,\n        \"totalOrders\": 90,\n        \"year\": 2025,\n        \"month\": 8\n    },\n    {\n        \"totalSales\": 6904.76,\n        \"totalOrders\": 86,\n        \"year\": 2025,\n        \"month\": 9\n    },\n    {\n        \"totalSales\": 7495.84,\n        \"totalOrders\": 89,\n        \"year\": 2025,\n        \"month\": 10\n    },\n    {\n        \"totalSales\": 7875.56,\n        \"totalOrders\": 98,\n        \"year\": 2025,\n        \"month\": 11\n    },\n    {\n        \"totalSales\": 10301.47,\n        \"totalOrders\": 113,\n        \"year\": 2025,\n        \"month\": 12\n    },\n    {\n        \"totalSales\": 8212.29,\n        \"totalOrders\": 102,\n        \"year\": 2026,\n        \"month\": 1\n    },\n    {\n        \"totalSales\": 8134.36,\n        \"totalOrders\": 94,\n        \"year\": 2026,\n        \"month\": 2\n    },\n    {\n        \"totalSales\": 1702.65,\n        \"totalOrders\": 22,\n        \"year\": 2026,\n        \"month\": 3\n    }\n]"
+            }
+          ]
+        }
+      ],
+      "id": "4bf5c5cb-b014-4129-aa69-4043329b80d5"
     }
   ],
   "variable": [

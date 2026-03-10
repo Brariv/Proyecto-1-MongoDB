@@ -134,24 +134,6 @@ def get_restaurant_names():
 
 
 
-def get_menu(restaurant_id: str):
-    client = MongoClient(mongo_uri)
-    db = client[db_name]
-    menu_collection = db["menu"]
-    restaurant_collection = db["restaurantes"]
-    
-    menu = menu_collection.find()
-    not_available_items = restaurant_collection.find_one({"_id": ObjectId(restaurant_id)})
-    menu_items = []
-    for item in menu:
-        if item["name"] not in not_available_items.get("not_available_items", []):
-            menu_items.append({"name": item["name"], "price": item["price"]})
-
-    if menu:
-        return {"menu": menu_items}
-    else:
-        return {"message": "Menu not found for this restaurant"}, 404
-    
 def create_address(user_id: str, alias: str, address: str, city: str, state: str, postal_code: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]
@@ -238,7 +220,7 @@ def post_menu(pizza: str, type: str, size: str, price: float, available_until: s
     else:
         return {"message": "Failed to create menu item"}, 500
     
-def create_order(user_id: str, restaurant_id: str, items: list, paymen_method: str):
+def create_order(user_id: str, restaurant_id: str, items: list, payment_method: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     orders_collection = db["ordenes"]
@@ -257,7 +239,7 @@ def create_order(user_id: str, restaurant_id: str, items: list, paymen_method: s
         "Total": sum(item["Quantity"] * item["Price"] for item in menu_items),
         "Items": menu_items,
         "Order_date": _now_utc(),
-        "Payment_method": paymen_method
+        "Payment_method": payment_method
     }
     
     result = orders_collection.insert_one(order)
@@ -266,3 +248,167 @@ def create_order(user_id: str, restaurant_id: str, items: list, paymen_method: s
         return {"message": "Order created successfully"}, 201
     else:
         return {"message": "Failed to create order"}, 500
+    
+def bulk_update_menu(restaurants_ids: list, not_available_items: list):
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    restaurant_collection = db["restaurantes"]
+
+    update_result = restaurant_collection.update_many(
+        {"_id": {"$in": [ObjectId(restaurant_id) for restaurant_id in restaurants_ids]}},
+        {"$set": {"not_available_items": not_available_items}}
+    )
+
+    if update_result.modified_count > 0:
+        return {"message": "Menu updated successfully"}
+    else:
+        return {"message": "Failed to update menu"}, 500
+    
+
+
+def get_top_rated_restaurants():
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    reviews_collection = db["resenas"]
+
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$restaurant_id",
+                "avgStars": {"$avg": "$stars"},
+                "totalReviews": {"$sum": 1}
+            }
+        },
+        {"$sort": {"avgStars": -1}},
+        {"$limit": 5},
+        {
+            "$lookup": {
+                "from": "restaurantes",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "restaurantInfo"
+            }
+        },
+        {"$unwind": "$restaurantInfo"},
+        {
+            "$project": {
+                "_id": 0,
+                "restaurant_id": {"$toString": "$_id"},
+                "name": "$restaurantInfo.type",
+                "city": "$restaurantInfo.city",
+                "avgStars": {"$round": ["$avgStars", 2]},
+                "totalReviews": 1
+            }
+        }
+    ]
+
+    return list(reviews_collection.aggregate(pipeline))
+
+def get_sales_by_state():
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    orders_collection = db["ordenes"]
+
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "restaurantes",
+                "localField": "Restaurant_id",
+                "foreignField": "_id",
+                "as": "restaurant"
+            }
+        },
+        {"$unwind": "$restaurant"},
+        {
+            "$group": {
+                "_id": "$restaurant.state",
+                "total_sales": {"$sum": "$Total"},
+                "total_orders": {"$sum": 1}
+            }
+        },
+        {"$sort": {"total_sales": -1}},
+        {
+            "$project": {
+                "_id": 0,
+                "state": "$_id",
+                "total_sales": 1,
+                "total_orders": 1
+            }
+        }
+    ]
+
+    return list(orders_collection.aggregate(pipeline))
+
+
+def get_best_selling_product():
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    orders_collection = db["ordenes"]
+
+    pipeline = [
+        {"$unwind": "$Items"},
+        {
+            "$group": {
+                "_id": "$Items.Menu_id",
+                "totalQuantitySold": {"$sum": "$Items.Quantity"}
+            }
+        },
+        {"$sort": {"totalQuantitySold": -1}},
+        {
+            "$lookup": {
+                "from": "menu",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "menuInfo"
+            }
+        },
+        {"$unwind": "$menuInfo"},
+        {
+            "$project": {
+                "_id": 0,
+                "menu_id": {"$toString": "$_id"},
+                "productName": "$menuInfo.Pizza",
+                "type": "$menuInfo.Type",
+                "size": "$menuInfo.Size",
+                "totalQuantitySold": 1
+            }
+        }
+    ]
+
+    return list(orders_collection.aggregate(pipeline))
+
+
+def get_monthly_sales_trend():
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    orders_collection = db["ordenes"]
+
+    pipeline = [
+        {
+            "$group": {
+                "_id": {
+                    "year": {"$year": "$Order_date"},
+                    "month": {"$month": "$Order_date"}
+                },
+                "totalSales": {"$sum": "$Total"},
+                "totalOrders": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {
+                "_id.year": 1,
+                "_id.month": 1
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "year": "$_id.year",
+                "month": "$_id.month",
+                "totalSales": 1,
+                "totalOrders": 1
+            }
+        }
+    ]
+
+    return list(orders_collection.aggregate(pipeline))

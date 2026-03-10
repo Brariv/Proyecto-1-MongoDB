@@ -43,6 +43,10 @@ class review_id(BaseModel):
     stars: int 
     user_id: str
     restaurant_id: str
+    
+class bulk_edit(BaseModel):
+    items_ids: list
+    restaurants_ids: list
 
 
 @app.get("/")
@@ -110,46 +114,25 @@ def order(order: order):
 
 @app.get("/best-rated")
 def best_rated():
-    # Aquí puedes agregar la lógica para obtener los restaurantes mejor calificados desde la base de datos.
-    # Por ejemplo, podrías buscar los restaurantes con las mejores calificaciones y devolver sus detalles.
-
-    # return 200 OK con la lista de restaurantes mejor calificados
-    return [{"name": "Pizza Hut", "average_rating": 4.5}, {"name": "Domino's", "average_rating": 4.0}]
+    return get_top_rated_restaurants()
 
 @app.get("/sales-per-state")
 def sales_per_state():
-    # Aquí puedes agregar la lógica para obtener las ventas por estado desde la base de datos.
-    # Por ejemplo, podrías agrupar las ventas por estado y devolver los totales.
-
-    # return 200 OK con las ventas por estado
-    return [{"state": "CA", "total_sales": 10000}, {"state": "NY", "total_sales": 8000}]
+    return get_sales_by_state()
 
 @app.get("/best-sellers")
 def best_sellers():
-    # Aquí puedes agregar la lógica para obtener los restaurantes con más ventas desde la base de datos.
-    # Por ejemplo, podrías buscar los restaurantes con las ventas más altas y devolver sus detalles.
-
-    # return 200 OK con la lista de restaurantes mejor vendidos
-    return [{"name": "Pizza Hut", "total_sales": 10000}, {"name": "Domino's", "total_sales": 8000}]
+    return get_best_selling_product()
 
 @app.get("/sales-per-month")
 def sales_per_month():
-    # Aquí puedes agregar la lógica para obtener las ventas por mes desde la base de datos.
-    # Por ejemplo, podrías agrupar las ventas por mes y devolver los totales.
-
-    # return 200 OK con las ventas por mes
-    return [{"month": "January", "total_sales": 10000}, {"month": "February", "total_sales": 8000}]
+    return get_monthly_sales_trend()
 
 
 
 
 
-
-@app.post("/unavailable-items")
-def mark_item_unavailable(items_ids: list, restaurants_ids: list):
-    # Aquí puedes agregar la lógica para marcar los elementos del menú como no disponibles en los restaurantes especificados.
-    # Por ejemplo, podrías actualizar los documentos correspondientes en la base de datos para reflejar la disponibilidad de los elementos.
-
-    # return 200 OK con un mensaje de éxito
-    return {"message": "Items marked as unavailable successfully"}
+@app.patch("/unavailable-items")
+def mark_item_unavailable(bulk_edit: bulk_edit):
+    return bulk_update_menu(bulk_edit.restaurants_ids, bulk_edit.items_ids)
 
