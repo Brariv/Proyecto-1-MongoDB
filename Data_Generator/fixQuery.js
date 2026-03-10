@@ -46,21 +46,21 @@ db.menu.insertOne(
 db.menu.insertMany(
     [
         {
-        "Name": "Heart Pizza",
+        "Pizza": "Heart Pizza",
         "Type": "Cheese Pizza",
         "Size": "Large",
         "Price": 12.99,
         "available_until": "2026-03-01 23:59:59+00:00"
     },
     { 
-        "Name": "Stuffed Crust",
+        "Pizza": "Stuffed Crust",
         "Type": "Just Crust",
         "Size": "Medium",
         "Price": 9.99,
         "available_until": "2026-03-15 23:59:59+00:00"
     },
     {
-        "Name": "Pickle Pizza",
+        "Pizza": "Pickle Pizza",
         "Type": "Cheese Pizza",
         "Size": "Large",
         "Price": 14.99,

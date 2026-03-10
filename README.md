@@ -28,6 +28,7 @@ pip install -r dependencies.txt
 4. Ejecuta el script de generación de datos para cargar la base de datos con datos iniciales.
 ```
 python mongo.py --locations ../Data/pizza_hut_locations.csv --menu ../Data/pizza_hut_menu.csv --reviews ../Data/pizza_hut_reviews.csv
+python orders_only.py
 ```
 5. Inicia el servidor del backend.
 ```
