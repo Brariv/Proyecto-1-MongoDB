@@ -8,7 +8,6 @@ import {
   getReviewableRestaurants,
   submitOrder,
   getUserProfile,
-  updateUserProfile,
   createUserAddress,
   deleteUserAddress,
   updateReview,
@@ -26,16 +25,13 @@ const DASHBOARD_SECTIONS = {
 export default function UserDashboard({ user, onLogout }) {
   const [activeSection, setActiveSection] = useState(DASHBOARD_SECTIONS.order);
   const [toast, setToast] = useState(null);
-  const [profileEditMode, setProfileEditMode] = useState(false);
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
-    password: 'hashed_password',
     phone: '',
     addresses: [],
-    reviews_id: [],
   });
   const [newAddressForm, setNewAddressForm] = useState({
     alias: '',
@@ -81,19 +77,25 @@ export default function UserDashboard({ user, onLogout }) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const userProfile = await getUserProfile(user.id, { noCache: true, cacheBust: true });
+        const userProfile = await getUserProfile(user.id, {
+          noCache: true,
+          cacheBust: true,
+          profileFallback: {
+            name: user?.name || '',
+            email: user?.email || '',
+            phone: user?.phone || '',
+          },
+        });
         const allLocations = await getAllLocations();
         const userReviews = await getUserReviews(user.id);
         const allowedRestaurants = await getReviewableRestaurants(user.id);
 
         setProfile(userProfile);
         setProfileForm({
-          name: userProfile?.name ?? '',
-          email: userProfile?.email ?? '',
-          password: userProfile?.password ?? 'hashed_password',
-          phone: userProfile?.phone ?? '',
+          name: userProfile?.name || user?.name || '',
+          email: userProfile?.email || user?.email || '',
+          phone: userProfile?.phone || user?.phone || '',
           addresses: userProfile?.addresses ?? [],
-          reviews_id: userProfile?.reviews_id ?? [],
         });
         setLocations(allLocations);
         setReviews(userReviews);
@@ -111,7 +113,7 @@ export default function UserDashboard({ user, onLogout }) {
     };
 
     loadData();
-  }, [user.id]);
+  }, [user.id, user?.name, user?.email, user?.phone]);
 
   const refreshReviewsData = async () => {
     try {
@@ -129,12 +131,10 @@ export default function UserDashboard({ user, onLogout }) {
   const syncProfileForm = (nextProfile) => {
     setProfile(nextProfile);
     setProfileForm({
-      name: nextProfile?.name ?? '',
-      email: nextProfile?.email ?? '',
-      password: nextProfile?.password ?? 'hashed_password',
-      phone: nextProfile?.phone ?? '',
+      name: nextProfile?.name || user?.name || '',
+      email: nextProfile?.email || user?.email || '',
+      phone: nextProfile?.phone || user?.phone || '',
       addresses: nextProfile?.addresses ?? [],
-      reviews_id: nextProfile?.reviews_id ?? [],
     });
   };
 
@@ -266,7 +266,15 @@ export default function UserDashboard({ user, onLogout }) {
   };
 
   const refreshProfile = async (nextSelectedAddressId = null) => {
-    const updated = await getUserProfile(user.id, { noCache: true, cacheBust: true });
+    const updated = await getUserProfile(user.id, {
+      noCache: true,
+      cacheBust: true,
+      profileFallback: {
+        name: profileForm.name || user?.name || '',
+        email: profileForm.email || user?.email || '',
+        phone: profileForm.phone || user?.phone || '',
+      },
+    });
     if (updated) {
       syncProfileForm(updated);
 
@@ -350,27 +358,6 @@ export default function UserDashboard({ user, onLogout }) {
         message: error?.message || 'No se pudo eliminar la dirección.',
       });
     }
-  };
-
-  const handleSaveProfile = async () => {
-    const payload = {
-      name: profileForm.name,
-      email: profileForm.email,
-      phone: profileForm.phone,
-      reviews_id: profileForm.reviews_id,
-    };
-
-    const updatedProfile = await updateUserProfile(user.id, payload);
-    if (updatedProfile) {
-      syncProfileForm(updatedProfile);
-    }
-
-    setProfileEditMode(false);
-  };
-
-  const handleCancelProfileEdit = () => {
-    syncProfileForm(profile);
-    setProfileEditMode(false);
   };
 
   const handleSubmitOrder = async () => {
@@ -731,58 +718,32 @@ export default function UserDashboard({ user, onLogout }) {
     <section className="dashboard-panel">
       <div className="profile-screen-header">
         <h2>Perfil</h2>
-        {!profileEditMode ? (
-          <button type="button" className="new-review-button" onClick={() => setProfileEditMode(true)}>
-            <Pencil size={14} /> Editar perfil
-          </button>
-        ) : (
-          <div className="profile-actions">
-            <button type="button" className="back-button" onClick={handleCancelProfileEdit}>
-              Cancelar
-            </button>
-            <button type="button" className="send-order-button" onClick={handleSaveProfile}>
-              Guardar perfil
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="profile-data-grid">
         <label>
-          ID
-          <input value={profile?._id || user.id} disabled readOnly />
-        </label>
-        <label>
           Nombre
           <input
             value={profileForm.name}
-            disabled={!profileEditMode}
-            onChange={(event) => setProfileForm((prev) => ({ ...prev, name: event.target.value }))}
+            disabled
+            readOnly
           />
         </label>
         <label>
           Email
           <input
             value={profileForm.email}
-            disabled={!profileEditMode}
-            onChange={(event) => setProfileForm((prev) => ({ ...prev, email: event.target.value }))}
+            disabled
+            readOnly
           />
-        </label>
-        <label>
-          Password
-          <input value={profileForm.password} disabled readOnly />
         </label>
         <label>
           Teléfono
           <input
             value={profileForm.phone}
-            disabled={!profileEditMode}
-            onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
+            disabled
+            readOnly
           />
-        </label>
-        <label>
-          reviews_id
-          <input value={(profileForm.reviews_id || []).join(', ')} disabled readOnly />
         </label>
       </div>
 

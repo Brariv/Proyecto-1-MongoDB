@@ -837,8 +837,12 @@ body {
   padding: 0.85rem;
 }
 
-.add-address-box .new-review-button {
+.add-address-box .profile-actions {
   margin-top: 0.75rem;
+}
+
+.add-address-box .profile-actions .new-review-button {
+  margin-top: 0;
 }
 
 @media (max-width: 920px) {

@@ -151,6 +151,7 @@ const resolveMenuIdForOrder = (restaurantId, menuId) => {
 export const getUserProfile = async (userId, options = {}) => {
   const query = options?.cacheBust ? `?t=${Date.now()}` : '';
   const response = await requestJson(`/users/${userId}/addresses${query}`, options?.noCache ? { cache: 'no-store' } : undefined);
+  const profileFallback = options?.profileFallback || {};
   const addresses = Array.isArray(response?.addresses)
     ? response.addresses
     : Array.isArray(response?.address)
@@ -159,10 +160,10 @@ export const getUserProfile = async (userId, options = {}) => {
 
   return {
     _id: userId,
-    name: '',
-    email: '',
+    name: response?.name || profileFallback?.name || '',
+    email: response?.email || profileFallback?.email || '',
     password: 'hashed_password',
-    phone: '',
+    phone: response?.phone || profileFallback?.phone || '',
     addresses: addresses.map(normalizeAddress),
     reviews_id: [],
   };
@@ -191,7 +192,15 @@ export const updateUserProfile = async (userId, updatePayload) => {
     ),
   );
 
-  return getUserProfile(userId);
+  return getUserProfile(userId, {
+    noCache: true,
+    cacheBust: true,
+    profileFallback: {
+      name: updatePayload?.name || '',
+      email: updatePayload?.email || '',
+      phone: updatePayload?.phone || '',
+    },
+  });
 };
 
 export const createUserAddress = async (userId, addressPayload) => {
@@ -247,7 +256,25 @@ export const getNearbyLocationsByAddress = async (address) => {
   const latitude = Number(address?.latitude) || Number(address?.geo?.coordinates?.[1]) || 0;
   const longitude = Number(address?.longitude) || Number(address?.geo?.coordinates?.[0]) || 0;
 
-  return getNearRestaurants(latitude, longitude);
+  const nearbyFromBackend = await getNearRestaurants(latitude, longitude);
+  if (Array.isArray(nearbyFromBackend) && nearbyFromBackend.length > 0) {
+    return nearbyFromBackend;
+  }
+
+  const allLocations = await getAllLocations();
+  return allLocations
+    .map((restaurant) => ({
+      ...restaurant,
+      _distanceKm: getDistanceKm(
+        latitude,
+        longitude,
+        Number(restaurant.location?.latitude) || 0,
+        Number(restaurant.location?.longitude) || 0,
+      ),
+    }))
+    .sort((first, second) => first._distanceKm - second._distanceKm)
+    .slice(0, 3)
+    .map(({ _distanceKm, ...restaurant }) => restaurant);
 };
 
 export const getUserReviews = async (userId) => {
