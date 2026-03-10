@@ -33,7 +33,11 @@ python mongo.py --locations ../Data/pizza_hut_locations.csv --menu ../Data/pizza
 ```
 fastapi dev
 ```
-6. Inicia el servidor del frontend.
+6. Instala las dependencias del frontend.
+```
+npm install
+```
+7. Inicia el servidor del frontend.
 ```
 npm run dev
 ```
