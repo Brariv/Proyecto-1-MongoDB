@@ -190,8 +190,9 @@ def get_menu_restaurant(restaurant_id: str):
     not_available_products = restaurant_collection.find_one({"_id": ObjectId(restaurant_id)})
 
     menu_items = []
+    not_available_ids = [ObjectId(pid) if isinstance(pid, str) else pid for pid in not_available_products.get("not_available_products", [])]
     for item in menu:
-        if item["_id"] not in not_available_products.get("not_available_products", []):
+        if item["_id"] not in not_available_ids:
             menu_items.append({"id": str(item["_id"]), "pizza": item["Pizza"], "type": item["Type"], "size": item["Size"], "price": item["Price"]})
 
     
