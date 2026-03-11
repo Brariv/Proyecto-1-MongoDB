@@ -51,6 +51,9 @@ class bulk_edit(BaseModel):
 class address_del(BaseModel):
     address: str
 
+class menu_price_update(BaseModel):
+    price: float
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -151,3 +154,6 @@ def mark_item_unavailable(bulk_edit: bulk_edit):
 def delete_item(item_id: str):
     return delete_menu_item(item_id)
 
+@app.patch("/menu/{item_id}")
+def update_item(item_id: str, menu_price: menu_price_update):
+    return update_menu_item(item_id, menu_price.price)

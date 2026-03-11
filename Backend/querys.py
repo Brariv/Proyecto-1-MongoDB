@@ -228,6 +228,21 @@ def get_near_restaurants(latitude: float, longitude: float):
 
     return [{"restaurant_id": str(restaurant["_id"]), "type": restaurant["type"], "address": restaurant["location"], "phone": restaurant["phone"], "state": restaurant["state"], "city": restaurant["city"]} for restaurant in restaurants]
 
+def update_menu_item(item_id: str, price: float):
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    menu_collection = db["menu"]
+
+    update_result = menu_collection.update_one(
+        {"_id": ObjectId(item_id)},
+        {"$set": {"Price": price}}
+    )
+
+    if update_result.modified_count > 0:
+        return {"message": "Menu item updated successfully"}
+    else:
+        return {"message": "Failed to update menu item"}, 500
+
 def post_menu(pizza: str, type: str, size: str, price: float, available_until: str):
     client = MongoClient(mongo_uri)
     db = client[db_name]

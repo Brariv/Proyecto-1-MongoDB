@@ -11,7 +11,7 @@ db.resenas.find()
   .limit(1)
   
 db.usuarios.aggregate([
-  { $match: {"llenar con cliente modificado"} },
+  { $match: { "cliente": "modificado" } },
   {
     $project: {
       lastAddress: { $arrayElemAt: ["$addresses", -1] }
