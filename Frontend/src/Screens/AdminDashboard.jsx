@@ -10,6 +10,7 @@ import {
   getMonthlySalesTrend,
   getSalesByState,
   getTopRatedRestaurants,
+  updateAdminMenuItem,
 } from '../services/dashboardService';
 
 const ADMIN_SECTIONS = {
@@ -148,6 +149,32 @@ export default function AdminDashboard({ user, onLogout }) {
     }
   };
 
+  const handleUpdateMenuPrice = async (itemId, priceValue) => {
+    const numericPrice = Number(priceValue);
+
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      setAdminMessage('El precio debe ser un número mayor o igual a 0.');
+      return;
+    }
+
+    try {
+      await updateAdminMenuItem(itemId, numericPrice);
+      setMenuItems((prevItems) =>
+        prevItems.map((item) =>
+          item._id === itemId
+            ? {
+                ...item,
+                Price: numericPrice,
+              }
+            : item,
+        ),
+      );
+      setAdminMessage('Precio actualizado correctamente.');
+    } catch (updateError) {
+      setAdminMessage(updateError.message || 'No se pudo actualizar el precio del item.');
+    }
+  };
+
   const toggleSelection = (setFn, currentList, value) => {
     if (currentList.includes(value)) {
       setFn(currentList.filter((item) => item !== value));
@@ -237,7 +264,24 @@ export default function AdminDashboard({ user, onLogout }) {
                   <td>{item.Pizza}</td>
                   <td>{item.Type}</td>
                   <td>{item.Size}</td>
-                  <td>${item.Price.toFixed(2)}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      defaultValue={Number(item.Price ?? 0).toFixed(2)}
+                      aria-label={`Precio de ${item.Pizza}`}
+                      onKeyDown={(event) => {
+                        if (event.key !== 'Enter') {
+                          return;
+                        }
+
+                        event.preventDefault();
+                        handleUpdateMenuPrice(item._id, event.currentTarget.value);
+                        event.currentTarget.blur();
+                      }}
+                    />
+                  </td>
                   <td>
                     <button
                       type="button"

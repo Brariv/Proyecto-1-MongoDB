@@ -470,6 +470,25 @@ export const getAdminMenuItems = async () => {
   }));
 };
 
+export const updateAdminMenuItem = async (itemId, price) => {
+  const normalizedItemId = String(itemId ?? '').trim();
+  if (!normalizedItemId) {
+    throw new Error('Falta el id del item de menú.');
+  }
+
+  const requestBody = {
+    price: Number(price ?? 0),
+  };
+
+  return requestJson(`/menu/${normalizedItemId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+};
+
 export const createAdminMenuItem = async (payload = {}) => {
   const requestBody = {
     pizza: String(payload?.pizza ?? '').trim(),
